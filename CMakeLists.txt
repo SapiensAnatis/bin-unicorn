@@ -37,17 +37,6 @@ endif()
 # Initialize the SDK
 pico_sdk_init()
 
-
-
-add_subdirectory(morsecode)
-
 include(wifi_credentials.cmake OPTIONAL)
 
-if (DEFINED WIFI_SSID AND DEFINED WIFI_PASSWORD)
-    message("Detected WIFI_SSD and WIFI_PASSWORD. Including networking-enabled projects.")
-    add_subdirectory(bin_unicorn)
-else()
-    message(WARNING "WIFI_SSD and/or WIFI_PASSWORD not set. Skipping configuration of projects that require networking. "
-                    "To build these projects, create a file called wifi_credentials.cmake at the repository root which "
-                    "sets these variables.")
-endif()
+add_subdirectory(src)
