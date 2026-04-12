@@ -2,16 +2,18 @@
 set(SOURCES 
     http/tls_client.c
     http/http.cpp
-    parsing/parsing.cpp
     main.cpp
+    parsing/parsing.cpp
+    worker/worker.cpp
 )
 
 set(HEADERS    
     http/tls_client.h
     http/http.hpp
-    parsing/parsing.hpp
     mbedtls_config.h
+    parsing/parsing.hpp
     util.hpp
+    worker/worker.hpp
 )
 
 add_executable(bin_unicorn)
