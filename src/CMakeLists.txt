@@ -44,6 +44,9 @@ target_compile_definitions(bin_unicorn PRIVATE
     BIN_UNICORN_HOME_ADDRESS=\"${BIN_UNICORN_HOME_ADDRESS}\"
 )
 
+# Allows analysing binary size with nm --size-sort --print-size ./build/debug/bin/bin_unicorn.elf
+# target_link_options(bin_unicorn PRIVATE "-Wl,-Map=out.map")
+
 # The Pico SDK brings in its source files using INTERFACE targets, which means that any options we set in
 # target_compile_options will be used to compile the SDK as well. This causes the build to fail if our settings
 # are too strict. Work around this by manually setting the compile flags on the source files we own.
@@ -61,6 +64,9 @@ set_source_files_properties(
     COMPILE_OPTIONS
     "-Wno-pointer-sign" # unsigned char shenanigans
 )
+
+set_target_properties(bin_unicorn PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 target_link_libraries(bin_unicorn 
     pico_cyw43_arch_lwip_threadsafe_background
