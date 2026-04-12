@@ -1,6 +1,10 @@
-# pico-projects
+# bin-unicorn
 
-Monorepository of personal projects for the Raspberry Pi Pico / Pico W.
+Embedded application that interfaces with the [Reading Borough Council API](https://api.reading.gov.uk/) to fetch information about the next scheduled bin collection and display it.
+
+Targets the Raspberry Pi Pico W (RP2040) and runs on bare metal.
+
+At one point, it used to light up a [Pimoroni Unicorn LED matrix](https://shop.pimoroni.com/products/pico-unicorn-pack?variant=32369501306963) with colours representing the next collection details, but this functionality is being reworked. For now it writes the information to stdout, so it can only be viewed using a debug probe.
 
 ## Setup
 
