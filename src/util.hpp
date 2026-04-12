@@ -2,6 +2,7 @@
 #define UTIL_H_
 
 #include <charconv>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <string_view>
@@ -50,10 +51,12 @@ template <size_t N> consteval auto url_encode(const char (&input)[N]) {
 /// @brief Concatenate a string literal and a FixedString at compile time.
 template <size_t N, size_t M> consteval auto concat(const char (&a)[N], const FixedString<M> &b) {
     FixedString<(N - 1) + M> result;
-    for (size_t i = 0; i < N - 1; ++i)
+    for (size_t i = 0; i < N - 1; ++i) {
         result.push(a[i]);
-    for (size_t i = 0; i < b.len; ++i)
+    }
+    for (size_t i = 0; i < b.len; ++i) {
         result.push(b.data[i]);
+    }
     return result;
 }
 
@@ -62,7 +65,7 @@ template <size_t N, size_t M> consteval auto concat(const char (&a)[N], const Fi
 /// @param input The input string.
 /// @param out A reference to a number to assign the result to, if parsing is successful.
 /// @return A boolean indicating whether parsing succeeded.
-template <typename TNumber>
+template <std::integral TNumber>
 static bool try_parse_number(const std::string_view &input, TNumber &out) {
     const std::from_chars_result result =
         std::from_chars(input.data(), input.data() + input.size(), out);
