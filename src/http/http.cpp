@@ -14,7 +14,6 @@ extern "C" {
 #include <span>
 #include <string>
 
-
 namespace http {
 
 // ISRG Root X1

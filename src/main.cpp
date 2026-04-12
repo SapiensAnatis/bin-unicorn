@@ -2,9 +2,9 @@
 #error This source file can only be compiled for a Raspberry Pi Pico W.
 #endif
 
-#include "util.hpp"
 #include "http/http.hpp"
 #include "parsing/parsing.hpp"
+#include "util.hpp"
 
 #include "pico/cyw43_arch.h"
 #include "pico/stdlib.h"
@@ -33,8 +33,8 @@ bool connect_wifi() {
     cyw43_arch_enable_sta_mode();
 
     printf("Connecting to WiFi...\n");
-    if (cyw43_arch_wifi_connect_timeout_ms(BIN_UNICORN_WIFI_SSID, BIN_UNICORN_WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK,
-                                           30000)) {
+    if (cyw43_arch_wifi_connect_timeout_ms(BIN_UNICORN_WIFI_SSID, BIN_UNICORN_WIFI_PASSWORD,
+                                           CYW43_AUTH_WPA2_AES_PSK, 30000)) {
         printf("Failed to connect to WiFi.\n");
         return false;
     } else {
@@ -86,8 +86,7 @@ bool work_loop(const std::string &address, std::span<char> &response_buffer) {
         // The actual buffer overflow is guarded against in tls_client.c, however we should still
         // check the header to detect that the buffer does not contain the complete response.
         printf("Failed to parse collection data: Content-Length of %d exceeds buffer size of %d\n",
-               static_cast<int>(response.content_length),
-               static_cast<int>(response_buffer.size()));
+               static_cast<int>(response.content_length), static_cast<int>(response_buffer.size()));
         return false;
     }
 

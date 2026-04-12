@@ -1,12 +1,12 @@
 #ifndef HTTP_HTTP_H_
 #define HTTP_HTTP_H_
 
+#include <cstdint>
 #include <expected>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
-#include <cstdint>
 
 namespace http {
 

@@ -3,10 +3,10 @@
 
 #include <cJSON.h>
 
-#include <expected>
-#include <tuple>
-#include <string_view>
 #include <cstdint>
+#include <expected>
+#include <string_view>
+#include <tuple>
 
 namespace parsing {
 
