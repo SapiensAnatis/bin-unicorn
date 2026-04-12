@@ -46,31 +46,22 @@ target_compile_definitions(bin_unicorn PRIVATE
     BIN_UNICORN_HOME_ADDRESS=\"${BIN_UNICORN_HOME_ADDRESS}\"
 )
 
-target_compile_options(bin_unicorn PRIVATE
-    -Wall
-    -Werror
-    -Wextra
-    -Wpedantic
-    -Wno-unused-parameter
-)
-
-# Disable Pico SDK warnings.
-# Bit of a hack, but not all headers appear to be included using -isystem so -Werror fails the build without this
-file(GLOB_RECURSE PICO_SDK_FILES "${PICO_SDK_PATH}/*.c" "${PICO_SDK_PATH}/*.h")
-
+# The Pico SDK brings in its source files using INTERFACE targets, which means that any options we set in
+# target_compile_options will be used to compile the SDK as well. This causes the build to fail if our settings
+# are too strict. Work around this by manually setting the compile flags on the source files we own.
 set_source_files_properties(
-    ${PICO_SDK_FILES}
+    ${SOURCES}
     PROPERTIES
-    COMPILE_FLAGS
-    -w # disable all warnings
+    COMPILE_OPTIONS
+    "-Wall;-Werror;-Wextra;-Wpedantic;-Wno-unused-parameter"
 )
 
-# This file has to do some cursed C stuff
+# We can't disable this warning globally as the flag is not supported when compiling C++ files.
 set_source_files_properties(
     http/tls_client.c 
     PROPERTIES
-    COMPILE_FLAGS
-    -Wno-pointer-sign # unsigned char shenanigans
+    COMPILE_OPTIONS
+    "-Wno-pointer-sign" # unsigned char shenanigans
 )
 
 target_link_libraries(bin_unicorn 
