@@ -1,4 +1,4 @@
 {
-    "cmake.useCMakePresets": "always",
+    "cmake.showSystemKits": false,
     "raspberry-pi-pico.useCmakeTools": true
 }

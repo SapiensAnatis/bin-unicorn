@@ -8,9 +8,9 @@ At one point, it used to light up a [Pimoroni Unicorn LED matrix](https://shop.p
 
 ## Setup
 
-Requires the [Pico SDK](https://github.com/raspberrypi/pico-sdk) and defining `PICO_SDK_PATH`. Some targets need the [Pimoroni Pico libraries](https://github.com/pimoroni/pimoroni-pico).
+The recommended workflow is to use Visual Studio Code with the Raspberry Pi Pico extension, which will handle installing the right version of the SDK and GCC ARM embedded toolchain.
 
-Also requires an installation of the [GCC ARM toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads). Download this and set the `bin` folder to be on your `PATH` and the Pico SDK will find the right compiler to use.
+If using a different setup or the command line, you need to install the SDK and toolchain manually, then set `$PICO_SDK_PATH` to the SDK path, and add the embedded toolchain's `bin/` folder to your `$PATH`.
 
 Per-user build values (WiFi credentials, project-specific secrets like `BIN_UNICORN_HOME_ADDRESS`) are sourced from environment variables.
 
