@@ -4,7 +4,6 @@
 
 #include "http/http.hpp"
 #include "parsing/parsing.hpp"
-#include "util.hpp"
 
 #include "pico/cyw43_arch.h"
 #include "pico/stdlib.h"
@@ -14,14 +13,14 @@
 #include <cstdlib>
 #include <span>
 
-constexpr uint32_t THREE_HOURS_MS = 3 * 60 * 60 * 1000;
+static constexpr uint32_t THREE_HOURS_MS = 3 * 60 * 60 * 1000;
 
-constexpr uint32_t ERROR_SLEEP = THREE_HOURS_MS;
-constexpr uint32_t SUCCESS_SLEEP = THREE_HOURS_MS * 2;
+static constexpr uint32_t ERROR_SLEEP = THREE_HOURS_MS;
+static constexpr uint32_t SUCCESS_SLEEP = THREE_HOURS_MS * 2;
 
-constexpr uint32_t WIFI_CONNECT_FAIL_SLEEP = 5 * 1000;
+static constexpr uint32_t WIFI_CONNECT_FAIL_SLEEP = 5 * 1000;
 
-constexpr size_t RESPONSE_BUFFER_SIZE = 2048;
+static constexpr size_t RESPONSE_BUFFER_SIZE = 2048;
 
 /// @brief Connect to the WiFi network using the WIFI_SSID and WIFI_PASSWORD definitions.
 /// @return True if successful, otherwise false.
@@ -45,16 +44,15 @@ bool connect_wifi() {
 }
 
 /// @brief Main worker loop.
-/// @param address The address to fetch collection data for.
 /// @param response_buffer
 /// @return True if the loop succeeded, otherwise false.
-bool work_loop(const std::string &address, std::span<char> &response_buffer) {
+bool work_loop(std::span<char> &response_buffer) {
     using namespace std::literals;
 
     // Zero out buffer to avoid being able to read uninitialized memory via Content-Length attacks
     std::fill(response_buffer.begin(), response_buffer.end(), 0);
 
-    http::HttpsGetResult fetch_result = http::fetch_collection_data(address, response_buffer);
+    http::HttpsGetResult fetch_result = http::fetch_collection_data(response_buffer);
     if (fetch_result != http::HttpsGetResult::Success) {
         printf("Failed to fetch collection data: error=%d\n", static_cast<int>(fetch_result));
         return false;
@@ -124,8 +122,6 @@ int main() {
 
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
 
-    std::string address = url_encode(BIN_UNICORN_HOME_ADDRESS);
-
     char *response_buffer_ptr = (char *)malloc(RESPONSE_BUFFER_SIZE);
     if (response_buffer_ptr == nullptr) {
         fprintf(stderr, "Failed to allocate response buffer\n");
@@ -135,7 +131,7 @@ int main() {
     std::span<char> response_buffer(response_buffer_ptr, RESPONSE_BUFFER_SIZE);
 
     while (true) {
-        bool success = work_loop(address, response_buffer);
+        bool success = work_loop(response_buffer);
         if (success) {
             // TODO: If the device is started in the day prior to the collection data changing,
             // sleeping here could lead to stale data being displayed. Consider using NTP instead to

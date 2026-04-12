@@ -5,7 +5,6 @@
 #include <expected>
 #include <optional>
 #include <span>
-#include <string>
 #include <string_view>
 
 namespace http {
@@ -33,10 +32,8 @@ struct HttpResponse {
 /// @brief Fetch data on waste collection from Reading Borough Council.
 /// @param buffer The buffer that the UTF-8 response should be written to. Will be demoted to a
 /// pointer in tls_client.c; ensure it has enough space reserved.
-/// @param url_encoded_address The address to fetch collection data for. Must be URL-encoded.
 /// @return A result code from the https_get request.
-HttpsGetResult fetch_collection_data(const std::string &url_encoded_address,
-                                     std::span<char> &buffer);
+HttpsGetResult fetch_collection_data(std::span<char> &buffer);
 
 /// @brief Parse a returned HTTP response buffer to retrieve the status code and some useful
 /// headers.

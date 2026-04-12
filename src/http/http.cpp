@@ -12,7 +12,6 @@ extern "C" {
 #include <expected>
 #include <optional>
 #include <span>
-#include <string>
 
 namespace http {
 
@@ -56,7 +55,7 @@ static constexpr const char *READING_GOV_UK_HEADERS = "Accept: application/json\
 User-Agent: bin_unicorn/0.1.0 RP2040\r\n\
 GitHub-Username: sapiensanatis\r\n";
 
-static consteval size_t string_length(const std::string &arg) {
+static consteval size_t string_length(const std::string_view arg) {
     // Get string length without pesky null terminator which is included in sizeof()
     return arg.size();
 }
@@ -70,13 +69,13 @@ static std::optional<std::string_view> find_header_value(const std::string_view 
                                                          const std::string_view header_name) {
 
     auto header_start = headers_string.find(header_name);
-    if (header_start == std::string::npos) {
+    if (header_start == std::string_view::npos) {
         print_failed_to_find_header(header_name);
         return std::nullopt;
     }
 
     auto header_end = headers_string.find("\r\n", header_start);
-    if (header_end == std::string::npos) {
+    if (header_end == std::string_view::npos) {
         print_failed_to_find_header(header_name);
         return std::nullopt;
     }
@@ -88,9 +87,8 @@ static std::optional<std::string_view> find_header_value(const std::string_view 
                             headers_string.begin() + header_end);
 }
 
-HttpsGetResult fetch_collection_data(const std::string &url_encoded_address,
-                                     std::span<char> &buffer) {
-    const auto uri = "/rbc/mycollections/" + url_encoded_address;
+HttpsGetResult fetch_collection_data(std::span<char> &buffer) {
+    static constexpr auto uri = concat("/rbc/mycollections/", url_encode(BIN_UNICORN_HOME_ADDRESS));
 
     TlsClientRequest request = {
         .hostname = READING_GOV_UK_HOST,
@@ -141,7 +139,7 @@ std::expected<HttpResponse, HttpsParseResult> parse_response(const std::span<cha
     std::string_view buffer_string(buffer.data(), buffer.size());
 
     auto headers_end = buffer_string.find("\r\n\r\n");
-    if (headers_end == std::string::npos) {
+    if (headers_end == std::string_view::npos) {
         fprintf(stderr, "Failed to find end of response headers\n");
         return std::unexpected(HttpsParseResult::Failure);
     }

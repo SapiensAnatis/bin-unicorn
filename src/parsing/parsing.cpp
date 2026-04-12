@@ -7,7 +7,6 @@
 #include <cstdio>
 #include <expected>
 #include <memory>
-#include <string>
 #include <string_view>
 
 namespace parsing {
@@ -15,7 +14,7 @@ namespace parsing {
 static bool try_parse_collection_string(const std::string_view &service_string,
                                         CollectionType &out_collection_type) {
     size_t first_word_end = service_string.find(" Collection Service");
-    if (first_word_end == std::string::npos) {
+    if (first_word_end == std::string_view::npos) {
         return false;
     }
 
