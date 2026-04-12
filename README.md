@@ -16,8 +16,8 @@ Open **Preferences: Open User Settings (JSON)** from the command palette and add
 
 ```json
 "cmake.configureEnvironment": {
-    "WIFI_SSID": "Your Network",
-    "WIFI_PASSWORD": "Your Password",
+    "BIN_UNICORN_WIFI_SSID": "Your Network",
+    "BIN_UNICORN_WIFI_PASSWORD": "Your Password",
     "BIN_UNICORN_HOME_ADDRESS": "40 Caversham Road Reading, RG17EB"
 }
 ```

@@ -29,7 +29,7 @@ bool connect_wifi() {
     cyw43_arch_enable_sta_mode();
 
     std::cout << "Connecting to WiFi...\n";
-    if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK,
+    if (cyw43_arch_wifi_connect_timeout_ms(BIN_UNICORN_WIFI_SSID, BIN_UNICORN_WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK,
                                            30000)) {
         std::cout << "Failed to connect to WiFi.\n";
         return false;
