@@ -8,13 +8,12 @@
 #include "pico/stdlib.h"
 
 #include <array>
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #include <span>
 
 static constexpr uint32_t WIFI_CONNECT_FAIL_SLEEP = 5 * 1000;
-
-static constexpr size_t RESPONSE_BUFFER_SIZE = 2048;
 
 /// @brief Connect to the WiFi network using the WIFI_SSID and WIFI_PASSWORD definitions.
 /// @return True if successful, otherwise false.
@@ -52,11 +51,8 @@ int main() {
 
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
 
-    static std::array<char, RESPONSE_BUFFER_SIZE> http_buffer_array;
-    std::span<char> http_buffer(http_buffer_array);
-
     while (true) {
-        auto [sleep, result_option] = worker::do_work_loop(http_buffer);
+        auto [sleep, result_option] = worker::do_work_loop();
 
         bool success = result_option.has_value();
 
@@ -65,12 +61,13 @@ int main() {
             // sleeping here could lead to stale data being displayed. Consider using NTP instead to
             // re-run the work loop at a specific time when an update is expected.
 
-            printf("Work loop succeeded. Sleeping for %lu ms\n", static_cast<unsigned long>(sleep));
-            sleep_ms(sleep);
+            printf("Work loop succeeded\n");
         } else {
-            printf("Work loop failed! Sleeping for %lu ms\n", static_cast<unsigned long>(sleep));
-            sleep_ms(sleep);
+            printf("Work loop failed!\n");
         }
+
+        printf("Sleeping for %" PRIu32 " ms.\n", sleep);
+        sleep_ms(sleep);
     }
 
     cyw43_arch_deinit();

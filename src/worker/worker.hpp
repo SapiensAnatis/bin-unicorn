@@ -4,9 +4,7 @@
 #include "parsing/parsing.hpp"
 
 #include <cstdint>
-#include <expected>
 #include <optional>
-#include <span>
 
 namespace worker {
 
@@ -15,7 +13,7 @@ struct WorkLoopResult {
     std::optional<parsing::BinCollection> next_collection;
 };
 
-WorkLoopResult do_work_loop(std::span<char> http_buffer);
+WorkLoopResult do_work_loop();
 
 } // namespace worker
 

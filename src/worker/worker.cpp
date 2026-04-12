@@ -3,8 +3,10 @@
 #include "http/http.hpp"
 #include "parsing/parsing.hpp"
 
+#include <array>
 #include <cstdio>
 #include <expected>
+#include <span>
 
 namespace worker {
 
@@ -16,9 +18,12 @@ static constexpr uint32_t SUCCESS_SLEEP_MS = THREE_HOURS_MS * 2;
 static constexpr WorkLoopResult FAIL_RESULT = {.sleep_time_ms = ERROR_SLEEP_MS,
                                                .next_collection = std::nullopt};
 
-WorkLoopResult do_work_loop(std::span<char> http_buffer) {
-    // Zero out buffer to avoid being able to read uninitialized memory via Content-Length attacks
-    std::fill(http_buffer.begin(), http_buffer.end(), 0);
+static constexpr size_t RESPONSE_BUFFER_SIZE = 2048;
+
+WorkLoopResult do_work_loop() {
+    static std::array<char, RESPONSE_BUFFER_SIZE>
+        http_buffer_array{}; // should be zeroed, in case a fake Content-Length is sent
+    std::span<char> http_buffer(http_buffer_array);
 
     auto fetch_result = http::fetch_collection_data(http_buffer);
     if (!fetch_result.has_value()) {
