@@ -3,7 +3,9 @@ pkgs.mkShell {
   buildInputs = with pkgs;
     [
       vscode
-      libusb1 hidapi              # Needed by picotool
+      libusb1                     # Needed by picotool
+      hidapi                      # Needed by picotool
+      ninja
       cmake
       python3
       udisks                      # Interact with bootloader filesystem
@@ -14,6 +16,6 @@ pkgs.mkShell {
     # We don't install the pico sdk here; that should be handled by the Pico VS Code
     # extension
   shellHook = ''
-    export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [ pkgs.libusb1 pkgs.hidapi ]}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+    export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [ pkgs.libusb1 pkgs.hidapi pkgs.stdenv.cc.cc.lib ]}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
   '';
 }
