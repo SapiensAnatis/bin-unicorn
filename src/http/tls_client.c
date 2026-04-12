@@ -9,8 +9,7 @@
 #error This source file can only be compiled for a Raspberry Pi Pico W.
 #endif
 
-#include <string.h>
-#include <time.h>
+#include "http/tls_client.h"
 
 #include "hardware/structs/rosc.h"
 #include "lwip/altcp_tcp.h"
@@ -21,7 +20,9 @@
 #include "mbedtls/debug.h"
 #include "pico/cyw43_arch.h"
 #include "pico/stdlib.h"
-#include "tls_client.h"
+
+#include <string.h>
+#include <time.h>
 
 #define TLS_CLIENT_REQUEST_FORMAT                                                                  \
     "GET %s HTTP/1.1\r\n"                                                                          \

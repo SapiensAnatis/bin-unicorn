@@ -1,3 +1,11 @@
+#include "http/http.hpp"
+
+#include "util.hpp"
+
+extern "C" {
+#include "http/tls_client.h"
+}
+
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
@@ -6,12 +14,6 @@
 #include <span>
 #include <string>
 
-extern "C" {
-#include "tls_client.h"
-}
-
-#include "http.hpp"
-#include "util.hpp"
 
 namespace http {
 

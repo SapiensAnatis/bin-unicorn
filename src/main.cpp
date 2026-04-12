@@ -2,15 +2,16 @@
 #error This source file can only be compiled for a Raspberry Pi Pico W.
 #endif
 
-#include <array>
-#include <cstdio>
-#include <span>
-
 #include "util.hpp"
 #include "http/http.hpp"
 #include "parsing/parsing.hpp"
+
 #include "pico/cyw43_arch.h"
 #include "pico/stdlib.h"
+
+#include <array>
+#include <cstdio>
+#include <span>
 
 constexpr uint32_t THREE_HOURS_MS = 3 * 60 * 60 * 1000;
 

@@ -1,6 +1,9 @@
 #ifndef HTTP_TLS_CLIENT_H_
 #define HTTP_TLS_CLIENT_H_
 
+#include <stdint.h>
+#include <stddef.h>
+
 /// @brief Request object for tls_client.
 typedef struct {
     const char *hostname;

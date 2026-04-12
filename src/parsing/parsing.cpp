@@ -1,12 +1,13 @@
+#include "parsing/parsing.hpp"
+
+#include "util.hpp"
+
 #include <charconv>
 #include <cstdio>
 #include <expected>
 #include <memory>
 #include <string>
 #include <string_view>
-
-#include "parsing/parsing.hpp"
-#include "util.hpp"
 
 namespace parsing {
 
