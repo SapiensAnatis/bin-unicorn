@@ -5,13 +5,9 @@
  * https://github.com/MichaelBell/Picodon/blob/08d30cfb9d10d6afd966fdd4f9210867cf3bb461/tls_client.c#L268
  */
 
-#define TLS_CLIENT_REQUEST_FORMAT                                                                  \
-    "GET %s HTTP/1.1\r\n"                                                                          \
-    "Host: %s\r\n"                                                                                 \
-    "Connection: close\r\n"                                                                        \
-    "%s\r\n"                                                                                       \
-    "\r\n"
-#define TLS_CLIENT_TIMEOUT_SECS 120
+#ifndef PICO_W
+#error This source file can only be compiled for a Raspberry Pi Pico W.
+#endif
 
 #include <string.h>
 #include <time.h>
@@ -27,7 +23,15 @@
 #include "pico/stdlib.h"
 #include "tls_client.h"
 
-typedef struct TLS_CLIENT_T_ {
+#define TLS_CLIENT_REQUEST_FORMAT                                                                  \
+    "GET %s HTTP/1.1\r\n"                                                                          \
+    "Host: %s\r\n"                                                                                 \
+    "Connection: close\r\n"                                                                        \
+    "%s\r\n"                                                                                       \
+    "\r\n"
+#define TlsClientIMEOUT_SECS 120
+
+typedef struct {
     struct altcp_pcb *pcb;
     bool complete;
     int32_t error;
@@ -36,7 +40,7 @@ typedef struct TLS_CLIENT_T_ {
     int32_t response_buffer_len;
     int32_t response_cursor;
     int32_t timeout;
-} TLS_CLIENT_T;
+} TlsClient;
 
 static struct altcp_tls_config *tls_config = NULL;
 
@@ -49,7 +53,7 @@ static void my_debug(void *ctx, int level, const char *file, int line, const cha
 #endif
 
 static err_t tls_client_close(void *arg) {
-    TLS_CLIENT_T *state = (TLS_CLIENT_T *)arg;
+    TlsClient *state = (TlsClient *)arg;
     err_t err = ERR_OK;
 
     state->complete = true;
@@ -70,7 +74,7 @@ static err_t tls_client_close(void *arg) {
 }
 
 static err_t tls_client_connected(void *arg, [[maybe_unused]] struct altcp_pcb *pcb, err_t err) {
-    TLS_CLIENT_T *state = (TLS_CLIENT_T *)arg;
+    TlsClient *state = (TlsClient *)arg;
     if (err != ERR_OK) {
         printf("Connect failed; err=%d\n", err);
         return tls_client_close(state);
@@ -88,14 +92,14 @@ static err_t tls_client_connected(void *arg, [[maybe_unused]] struct altcp_pcb *
 }
 
 static err_t tls_client_poll(void *arg, [[maybe_unused]] struct altcp_pcb *pcb) {
-    TLS_CLIENT_T *state = (TLS_CLIENT_T *)arg;
+    TlsClient *state = (TlsClient *)arg;
     printf("Request timed out\n");
     state->error = PICO_ERROR_TIMEOUT;
     return tls_client_close(arg);
 }
 
 static void tls_client_err(void *arg, err_t err) {
-    TLS_CLIENT_T *state = (TLS_CLIENT_T *)arg;
+    TlsClient *state = (TlsClient *)arg;
     printf("tls_client_err %d\n", err);
     tls_client_close(state);
     state->error = PICO_ERROR_GENERIC;
@@ -103,7 +107,7 @@ static void tls_client_err(void *arg, err_t err) {
 
 static err_t tls_client_recv(void *arg, struct altcp_pcb *pcb, struct pbuf *p,
                              [[maybe_unused]] err_t err) {
-    TLS_CLIENT_T *state = (TLS_CLIENT_T *)arg;
+    TlsClient *state = (TlsClient *)arg;
     if (!p) {
         printf("Connection closed\n");
         return tls_client_close(state);
@@ -134,7 +138,7 @@ static err_t tls_client_recv(void *arg, struct altcp_pcb *pcb, struct pbuf *p,
     return ERR_OK;
 }
 
-static void tls_client_connect_to_server_ip(const ip_addr_t *ipaddr, TLS_CLIENT_T *state) {
+static void tls_client_connect_to_server_ip(const ip_addr_t *ipaddr, TlsClient *state) {
     err_t err;
     u16_t port = 443;
 
@@ -149,7 +153,7 @@ static void tls_client_connect_to_server_ip(const ip_addr_t *ipaddr, TLS_CLIENT_
 static void tls_client_dns_found(const char *hostname, const ip_addr_t *ipaddr, void *arg) {
     if (ipaddr) {
         printf("DNS resolving complete\n");
-        tls_client_connect_to_server_ip(ipaddr, (TLS_CLIENT_T *)arg);
+        tls_client_connect_to_server_ip(ipaddr, (TlsClient *)arg);
     } else {
         printf("Error resolving hostname %s\n", hostname);
         tls_client_close(arg);
@@ -159,7 +163,7 @@ static void tls_client_dns_found(const char *hostname, const ip_addr_t *ipaddr, 
 static bool tls_client_open(const char *hostname, void *arg) {
     err_t err;
     ip_addr_t server_ip;
-    TLS_CLIENT_T *state = (TLS_CLIENT_T *)arg;
+    TlsClient *state = (TlsClient *)arg;
 
     state->pcb = altcp_tls_new(tls_config, IPADDR_TYPE_ANY);
     if (!state->pcb) {
@@ -198,8 +202,8 @@ static bool tls_client_open(const char *hostname, void *arg) {
 }
 
 // Perform initialisation
-static TLS_CLIENT_T *tls_client_init(void) {
-    TLS_CLIENT_T *state = calloc(1, sizeof(TLS_CLIENT_T));
+static TlsClient *tls_client_init(void) {
+    TlsClient *state = calloc(1, sizeof(TlsClient));
     if (!state) {
         printf("Failed to allocate state\n");
         return NULL;
@@ -208,12 +212,12 @@ static TLS_CLIENT_T *tls_client_init(void) {
     return state;
 }
 
-int8_t https_get(TLS_CLIENT_REQUEST request, char *restrict buffer, uint16_t buffer_len) {
+int8_t https_get(TlsClientRequest request, char *restrict buffer, uint16_t buffer_len) {
     assert(buffer != NULL);
 
     tls_config = altcp_tls_create_config_client(request.cert, request.cert_len);
 
-    TLS_CLIENT_T *state = tls_client_init();
+    TlsClient *state = tls_client_init();
     if (!state) {
         altcp_tls_free_config(tls_config);
         return -3;
@@ -224,7 +228,7 @@ int8_t https_get(TLS_CLIENT_REQUEST request, char *restrict buffer, uint16_t buf
     mbedtls_ssl_conf_dbg(NULL, my_debug, stdout);
 #endif
 
-    state->timeout = TLS_CLIENT_TIMEOUT_SECS;
+    state->timeout = TlsClientIMEOUT_SECS;
 
     state->http_request = buffer;
     snprintf(state->http_request, buffer_len, TLS_CLIENT_REQUEST_FORMAT, request.uri,

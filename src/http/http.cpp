@@ -64,7 +64,7 @@ HttpsGetResult fetch_collection_data(const std::string &url_encoded_address,
                                      std::span<char> &buffer) {
     const auto uri = "/rbc/mycollections/" + url_encoded_address;
 
-    TLS_CLIENT_REQUEST request = {
+    TlsClientRequest request = {
         request.hostname = READING_GOV_UK_HOST,
         request.headers = READING_GOV_UK_HEADERS,
         request.uri = uri.c_str(),

@@ -2,13 +2,13 @@
 #define HTTP_TLS_CLIENT_H_
 
 /// @brief Request object for tls_client.
-typedef struct TLS_CLIENT_REQUEST_T_ {
+typedef struct {
     const char *hostname;
     const char *uri;
     const char *headers;
     const uint8_t *cert;
     size_t cert_len;
-} TLS_CLIENT_REQUEST;
+} TlsClientRequest;
 
 /// @brief Send a HTTPS GET request.
 /// @param request Request details.
@@ -20,6 +20,6 @@ typedef struct TLS_CLIENT_REQUEST_T_ {
 ///   * -2: Failed to resolve DNS & open connection, or the tls_client_err callback was hit.
 ///   * -3: Failed to allocate client state.
 ///   * -4: Request was apparently successful, but no bytes were written to the buffer.
-int8_t https_get(TLS_CLIENT_REQUEST request, char *buffer, uint16_t buffer_len);
+int8_t https_get(TlsClientRequest request, char *buffer, uint16_t buffer_len);
 
 #endif // HTTP_TLS_CLIENT_H_

@@ -1,9 +1,13 @@
+#ifndef PICO_W
+#error This source file can only be compiled for a Raspberry Pi Pico W.
+#endif
+
 #include <array>
 #include <iostream>
 #include <span>
 #include <string>
 
-#include "./util.hpp"
+#include "util.hpp"
 #include "http/http.hpp"
 #include "parsing/parsing.hpp"
 #include "pico/cyw43_arch.h"
