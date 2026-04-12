@@ -1,10 +1,29 @@
-add_executable(bin_unicorn
+add_library(cjson STATIC ${CMAKE_SOURCE_DIR}/lib/cJSON/cJSON.c ${CMAKE_SOURCE_DIR}/lib/cJSON/cJSON.h)
+target_include_directories(cjson PUBLIC SYSTEM ${CMAKE_SOURCE_DIR}/lib/cJSON)
+
+set(SOURCES 
     http/tls_client.c
     http/http.cpp
     parsing/parsing.cpp
-    ../lib/cJSON/cJSON.c
-    main.cpp)
+    main.cpp
+)
 
+set(HEADERS    
+    http/tls_client.h
+    http/http.hpp
+    parsing/parsing.hpp
+    mbedtls_config.h
+    util.hpp
+)
+
+add_executable(bin_unicorn)
+
+target_sources(bin_unicorn 
+    PRIVATE ${SOURCES}
+    PUBLIC
+    FILE_SET HEADERS
+    FILES ${HEADERS}
+)
 
 # We can't set these variables using $env{} in CMakePresets.json due to a bug in the CMake Tools extension
 # https://github.com/microsoft/vscode-cmake-tools/issues/4384
@@ -61,14 +80,8 @@ target_link_libraries(bin_unicorn
     pico_stdlib
     hardware_pio
     hardware_dma
+    cjson
 )
-
-target_include_directories(bin_unicorn PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}
-    ${CMAKE_CURRENT_LIST_DIR}/..
-)
-
-target_include_directories(bin_unicorn SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/lib/cJSON)
 
 pico_add_extra_outputs(bin_unicorn)
 
