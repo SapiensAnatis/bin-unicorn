@@ -6,18 +6,16 @@
 #include <optional>
 #include <span>
 #include <string_view>
+#include <variant>
 
 namespace http {
 
-enum class HttpsGetResult : int8_t {
-    Success = 0,
-    ClientTimeout = -1,
-    FailedToConnect = -2,
-    FailedToAllocState = -3,
-    EmptyResponse = -4,
+enum class HttpsGetError : int8_t {
+    FailedToFormatRequest = -1,
+    TlsClientError = -2,
 };
 
-enum class HttpsParseResult : int8_t {
+enum class HttpsParseError : int8_t {
     Failure = -1,
     UnsupportedResponse = -2,
 };
@@ -32,14 +30,14 @@ struct HttpResponse {
 /// @brief Fetch data on waste collection from Reading Borough Council.
 /// @param buffer The buffer that the UTF-8 response should be written to. Will be demoted to a
 /// pointer in tls_client.c; ensure it has enough space reserved.
-/// @return A result code from the https_get request.
-HttpsGetResult fetch_collection_data(std::span<char> &buffer);
+/// @return Nothing, or a @ref HttpsGetError if parsing failed.
+std::expected<std::monostate, HttpsGetError> fetch_collection_data(std::span<char> &buffer);
 
 /// @brief Parse a returned HTTP response buffer to retrieve the status code and some useful
 /// headers.
 /// @param buffer The buffer that the UTF-8 response was written to.
-/// @return A @ref HttpResponse, or a @ref HttpParseResult error if parsing failed.
-std::expected<HttpResponse, HttpsParseResult> parse_response(const std::span<char> &buffer);
+/// @return A @ref HttpResponse, or a @ref HttpsParseError error if parsing failed.
+std::expected<HttpResponse, HttpsParseError> parse_response(const std::span<char> &buffer);
 
 } // namespace http
 

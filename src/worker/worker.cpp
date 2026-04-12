@@ -16,18 +16,19 @@ static constexpr uint32_t SUCCESS_SLEEP_MS = THREE_HOURS_MS * 2;
 static constexpr WorkLoopResult FAIL_RESULT = {.sleep_time_ms = ERROR_SLEEP_MS,
                                                .next_collection = std::nullopt};
 
-WorkLoopResult do_work_loop(std::span<char> response_buffer) {
+WorkLoopResult do_work_loop(std::span<char> http_buffer) {
     // Zero out buffer to avoid being able to read uninitialized memory via Content-Length attacks
-    std::fill(response_buffer.begin(), response_buffer.end(), 0);
+    std::fill(http_buffer.begin(), http_buffer.end(), 0);
 
-    http::HttpsGetResult fetch_result = http::fetch_collection_data(response_buffer);
-    if (fetch_result != http::HttpsGetResult::Success) {
-        printf("Failed to fetch collection data: error=%d\n", static_cast<int>(fetch_result));
+    auto fetch_result = http::fetch_collection_data(http_buffer);
+    if (!fetch_result.has_value()) {
+        printf("Failed to fetch collection data: error=%d\n",
+               static_cast<int>(fetch_result.error()));
         return FAIL_RESULT;
     }
 
-    std::expected<http::HttpResponse, http::HttpsParseResult> response_parse_result =
-        http::parse_response(response_buffer);
+    std::expected<http::HttpResponse, http::HttpsParseError> response_parse_result =
+        http::parse_response(http_buffer);
     if (!response_parse_result.has_value()) {
         printf("Failed to parse collection data: error=%d\n",
                static_cast<int>(response_parse_result.error()));
@@ -50,11 +51,11 @@ WorkLoopResult do_work_loop(std::span<char> response_buffer) {
         return FAIL_RESULT;
     }
 
-    if (response.content_length > response_buffer.size()) {
+    if (response.content_length > http_buffer.size()) {
         // The actual buffer overflow is guarded against in tls_client.c, however we should still
         // check the header to detect that the buffer does not contain the complete response.
         printf("Failed to parse collection data: Content-Length of %d exceeds buffer size of %d\n",
-               static_cast<int>(response.content_length), static_cast<int>(response_buffer.size()));
+               static_cast<int>(response.content_length), static_cast<int>(http_buffer.size()));
         return FAIL_RESULT;
     }
 

@@ -24,13 +24,7 @@
 #include <string.h>
 #include <time.h>
 
-#define TLS_CLIENT_REQUEST_FORMAT                                                                  \
-    "GET %s HTTP/1.1\r\n"                                                                          \
-    "Host: %s\r\n"                                                                                 \
-    "Connection: close\r\n"                                                                        \
-    "%s\r\n"                                                                                       \
-    "\r\n"
-#define TlsClientIMEOUT_SECS 120
+#define TLS_CLIENT_TIMEOUT_SECS 120
 
 typedef struct {
     struct altcp_pcb *pcb;
@@ -213,7 +207,7 @@ static TlsClient *tls_client_init(void) {
     return state;
 }
 
-int8_t https_get(TlsClientRequest request, char *restrict buffer, uint16_t buffer_len) {
+int32_t tls_request(TlsClientRequest request, char *buffer, uint16_t buffer_len) {
     assert(buffer != NULL);
 
     tls_config = altcp_tls_create_config_client(request.cert, request.cert_len);
@@ -229,11 +223,9 @@ int8_t https_get(TlsClientRequest request, char *restrict buffer, uint16_t buffe
     mbedtls_ssl_conf_dbg(NULL, tls_client_debug, stdout);
 #endif
 
-    state->timeout = TlsClientIMEOUT_SECS;
+    state->timeout = TLS_CLIENT_TIMEOUT_SECS;
 
     state->http_request = buffer;
-    snprintf(state->http_request, buffer_len, TLS_CLIENT_REQUEST_FORMAT, request.uri,
-             request.hostname, request.headers);
 
     state->response = buffer;
     state->response_buffer_len = buffer_len;

@@ -51,9 +51,15 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=\n\
 
 static constexpr const char *READING_GOV_UK_HOST = "api.reading.gov.uk";
 
-static constexpr const char *READING_GOV_UK_HEADERS = "Accept: application/json\r\n\
-User-Agent: bin_unicorn/0.1.0 RP2040\r\n\
-GitHub-Username: sapiensanatis\r\n";
+static constexpr const char *READING_GOV_UK_HEADERS = "Connection: close\r\n"
+                                                      "Host: api.reading.gov.uk\r\n"
+                                                      "Accept: application/json\r\n"
+                                                      "User-Agent: bin_unicorn/0.1.0 RP2040\r\n"
+                                                      "GitHub-Username: sapiensanatis\r\n";
+
+static constexpr const char *HTTP_REQUEST_FORMAT = "GET %s HTTP/1.1\r\n"
+                                                   "%s\r\n"
+                                                   "\r\n";
 
 static consteval size_t string_length(const std::string_view arg) {
     // Get string length without pesky null terminator which is included in sizeof()
@@ -87,26 +93,32 @@ static std::optional<std::string_view> find_header_value(const std::string_view 
                             headers_string.begin() + header_end);
 }
 
-HttpsGetResult fetch_collection_data(std::span<char> &buffer) {
+std::expected<std::monostate, HttpsGetError> fetch_collection_data(std::span<char> &buffer) {
     static constexpr auto uri = concat("/rbc/mycollections/", url_encode(BIN_UNICORN_HOME_ADDRESS));
+
+    const size_t bytes_written = snprintf(buffer.data(), buffer.size(), HTTP_REQUEST_FORMAT,
+                                          uri.c_str(), READING_GOV_UK_HEADERS);
+
+    if (bytes_written >= buffer.size()) {
+        return std::unexpected(HttpsGetError::FailedToFormatRequest);
+    }
 
     TlsClientRequest request = {
         .hostname = READING_GOV_UK_HOST,
-        .uri = uri.c_str(),
-        .headers = READING_GOV_UK_HEADERS,
+        .request = buffer.data(),
         .cert = READING_GOV_UK_ROOT_CERT,
         .cert_len = sizeof(READING_GOV_UK_ROOT_CERT),
     };
 
-    printf("Starting HTTPS GET: https://%s%s\n", request.hostname, request.uri);
+    printf("Starting HTTPS GET: https://%s%s\n", READING_GOV_UK_HOST, uri.c_str());
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    int8_t result = https_get(request, buffer.data(), buffer.size());
+    int8_t result = tls_request(request, buffer.data(), buffer.size());
 
     if (result < 0) {
         printf("Request failed; err=%d\n", static_cast<int>(result));
-        return static_cast<HttpsGetResult>(result);
+        return std::unexpected(HttpsGetError::TlsClientError);
     }
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -114,10 +126,10 @@ HttpsGetResult fetch_collection_data(std::span<char> &buffer) {
 
     printf("Request completed in %lld ms\n", static_cast<long long>(milliseconds.count()));
 
-    return HttpsGetResult::Success;
+    return {};
 }
 
-std::expected<HttpResponse, HttpsParseResult> parse_response(const std::span<char> &buffer) {
+std::expected<HttpResponse, HttpsParseError> parse_response(const std::span<char> &buffer) {
     /* A raw HTTP response looks like:
      *
      *   HTTP/1.1 200 OK
@@ -141,7 +153,7 @@ std::expected<HttpResponse, HttpsParseResult> parse_response(const std::span<cha
     auto headers_end = buffer_string.find("\r\n\r\n");
     if (headers_end == std::string_view::npos) {
         fprintf(stderr, "Failed to find end of response headers\n");
-        return std::unexpected(HttpsParseResult::Failure);
+        return std::unexpected(HttpsParseError::Failure);
     }
 
     std::string_view headers_string = buffer_string.substr(0, headers_end);
@@ -151,14 +163,14 @@ std::expected<HttpResponse, HttpsParseResult> parse_response(const std::span<cha
 
     if (!headers_string.starts_with("HTTP/1.1") ||
         headers_string.length() < string_length("HTTP/1.1 ") + status_code_size) {
-        return std::unexpected(HttpsParseResult::Failure);
+        return std::unexpected(HttpsParseError::Failure);
     }
 
     std::string_view status_code_view(headers_string.begin() + status_code_start, status_code_size);
     uint16_t status_code;
     if (!try_parse_number(status_code_view, status_code)) {
         fprintf(stderr, "Failed to parse status code\n");
-        return std::unexpected(HttpsParseResult::Failure);
+        return std::unexpected(HttpsParseError::Failure);
     }
 
     // We do not support chunked encoding, but the RBC API does not appear to use it. We should
@@ -169,7 +181,7 @@ std::expected<HttpResponse, HttpsParseResult> parse_response(const std::span<cha
     if (auto transfer_encoding = find_header_value(headers_string, "Transfer-Encoding");
         transfer_encoding == "chunked") {
         fprintf(stderr, "Chunked encoding is not supported\n");
-        return std::unexpected(HttpsParseResult::UnsupportedResponse);
+        return std::unexpected(HttpsParseError::UnsupportedResponse);
     }
 
     std::optional<std::string_view> content_length_view =
@@ -177,14 +189,14 @@ std::expected<HttpResponse, HttpsParseResult> parse_response(const std::span<cha
     uint16_t content_length;
     if (!content_length_view || !try_parse_number(*content_length_view, content_length)) {
         fprintf(stderr, "Failed to parse Content-Length\n");
-        return std::unexpected(HttpsParseResult::Failure);
+        return std::unexpected(HttpsParseError::Failure);
     }
 
     std::optional<std::string_view> content_type_view =
         find_header_value(headers_string, "Content-Type");
 
-    std::string_view body(buffer_string.begin() + headers_end + string_length("\r\n\r\n"),
-                          std::min(static_cast<size_t>(content_length), buffer.size()));
+    std::string_view body =
+        buffer_string.substr(headers_end + string_length("\r\n\r\n"), content_length);
 
     return HttpResponse{.status_code = status_code,
                         .content_length = content_length,
