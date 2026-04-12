@@ -10,7 +10,7 @@ namespace worker {
 
 static constexpr uint32_t ERROR_SLEEP_MS = 10'000;
 
-static constexpr uint32_t THREE_HOURS_MS = 3 * 60 * 60 * 1000;
+static constexpr uint32_t THREE_HOURS_MS = 3 * 60 * 60 * 1'000;
 static constexpr uint32_t SUCCESS_SLEEP_MS = THREE_HOURS_MS * 2;
 
 static constexpr WorkLoopResult FAIL_RESULT = {.sleep_time_ms = ERROR_SLEEP_MS,

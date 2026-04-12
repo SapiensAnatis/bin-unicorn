@@ -1,7 +1,9 @@
 #include "parsing/parsing.hpp"
 
+#include "parsing/arena.hpp"
 #include "util.hpp"
 
+#include <array>
 #include <charconv>
 #include <cstddef>
 #include <cstdio>
@@ -102,6 +104,24 @@ static std::expected<BinCollection, ParseError> parse_collection(const cJSON *co
 }
 
 std::expected<BinCollectionPair, ParseError> parse_response(const std::string_view &response_body) {
+    alignas(max_align_t) std::array<std::byte, 4096> arena_buffer{};
+    auto arena = Arena{arena_buffer.data(), arena_buffer.size()};
+    arena_set_current(arena);
+
+    // It's not thread-safe to call cJSON_InitHooks more than once, but we only have one core :)
+    cJSON_Hooks hooks{.malloc_fn = arena_malloc, .free_fn = arena_free};
+    cJSON_InitHooks(&hooks);
+
+    // Always clean up the arena, even if we return early
+    struct ArenaGuard {
+        ~ArenaGuard() {
+            cJSON_InitHooks(nullptr); // Reset hooks
+            arena_unset_current();
+        }
+    };
+
+    ArenaGuard guard;
+
     auto json = std::unique_ptr<cJSON, decltype(cJSON_Delete) *>{
         cJSON_ParseWithLength(response_body.data(), response_body.size()), cJSON_Delete};
 

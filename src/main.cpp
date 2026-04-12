@@ -52,16 +52,11 @@ int main() {
 
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
 
-    char *response_buffer_ptr = (char *)malloc(RESPONSE_BUFFER_SIZE);
-    if (response_buffer_ptr == nullptr) {
-        fprintf(stderr, "Failed to allocate response buffer\n");
-        return 1;
-    }
-
-    std::span<char> response_buffer(response_buffer_ptr, RESPONSE_BUFFER_SIZE);
+    static std::array<char, RESPONSE_BUFFER_SIZE> http_buffer_array;
+    std::span<char> http_buffer(http_buffer_array);
 
     while (true) {
-        auto [sleep, result_option] = worker::do_work_loop(response_buffer);
+        auto [sleep, result_option] = worker::do_work_loop(http_buffer);
 
         bool success = result_option.has_value();
 
@@ -79,7 +74,6 @@ int main() {
     }
 
     cyw43_arch_deinit();
-    free(response_buffer_ptr);
 
     return 0;
 }

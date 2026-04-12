@@ -15,7 +15,7 @@ struct WorkLoopResult {
     std::optional<parsing::BinCollection> next_collection;
 };
 
-WorkLoopResult do_work_loop(std::span<char> response_buffer);
+WorkLoopResult do_work_loop(std::span<char> http_buffer);
 
 } // namespace worker
 

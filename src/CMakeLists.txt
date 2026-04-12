@@ -3,6 +3,7 @@ set(SOURCES
     http/tls_client.c
     http/http.cpp
     main.cpp
+    parsing/arena.cpp
     parsing/parsing.cpp
     worker/worker.cpp
 )
@@ -11,6 +12,7 @@ set(HEADERS
     http/tls_client.h
     http/http.hpp
     mbedtls_config.h
+    parsing/arena.hpp
     parsing/parsing.hpp
     util.hpp
     worker/worker.hpp
