@@ -1,8 +1,6 @@
-#include <cassert>
 #include <charconv>
 #include <cstdio>
 #include <expected>
-#include <map>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -12,12 +10,6 @@
 
 namespace parsing {
 
-static const std::map<std::string_view, CollectionType> collection_map = {
-    {"Domestic Waste", CollectionType::DomesticWaste},
-    {"Food Waste", CollectionType::FoodWaste},
-    {"Recycling", CollectionType::Recycling},
-    {"Garden Waste", CollectionType::GardenWaste}};
-
 static bool try_parse_collection_string(const std::string_view &service_string,
                                         CollectionType &out_collection_type) {
     int first_word_end = service_string.find(" Collection Service");
@@ -25,45 +17,44 @@ static bool try_parse_collection_string(const std::string_view &service_string,
         return false;
     }
 
-    auto collection = collection_map.find(service_string.substr(0, first_word_end));
-    if (collection == collection_map.end()) {
-        return false;
+    std::string_view collection_type = service_string.substr(0, first_word_end);
+    if (collection_type == "Domestic Waste") {
+        out_collection_type = CollectionType::DomesticWaste;
+        return true;
+    } else if (collection_type == "Food Waste") {
+        out_collection_type = CollectionType::FoodWaste;
+        return true;
+    } else if (collection_type == "Recycling") {
+        out_collection_type = CollectionType::Recycling;
+        return true;
+    } else if (collection_type == "Garden Waste") {
+        out_collection_type = CollectionType::GardenWaste;
+        return true;
     }
 
-    out_collection_type = collection->second;
-    return true;
+    return false;
 }
 
 static bool try_parse_date(const std::string_view &date_time_string, Date &out_date) {
     // We receive dates in the format DD/MM/YYYY 00:00:00
-    // We don't care about the time
+    // We don't care about the time, but need at least "DD/MM/YYYY" (10 chars)
 
-    auto string_cursor_pos = date_time_string.begin();
+    if (date_time_string.size() < 10) {
+        return false;
+    }
 
     uint8_t day = 0;
-    std::string_view day_view{string_cursor_pos, string_cursor_pos + 2};
-
-    if (!try_parse_number(day_view, day)) {
+    if (!try_parse_number(date_time_string.substr(0, 2), day)) {
         return false;
     }
-
-    string_cursor_pos += 3;
-    assert(string_cursor_pos != date_time_string.end());
 
     uint8_t month = 0;
-    std::string_view month_view{string_cursor_pos, string_cursor_pos + 2};
-
-    if (!try_parse_number(month_view, month)) {
+    if (!try_parse_number(date_time_string.substr(3, 2), month)) {
         return false;
     }
 
-    string_cursor_pos += 3;
-    assert(string_cursor_pos != date_time_string.end());
-
     uint16_t year = 0;
-    std::string_view year_view{string_cursor_pos, string_cursor_pos + 4};
-
-    if (!try_parse_number(year_view, year)) {
+    if (!try_parse_number(date_time_string.substr(6, 4), year)) {
         return false;
     }
 
