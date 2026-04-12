@@ -3,6 +3,7 @@
 #include "util.hpp"
 
 #include <charconv>
+#include <cstddef>
 #include <cstdio>
 #include <expected>
 #include <memory>
@@ -13,8 +14,8 @@ namespace parsing {
 
 static bool try_parse_collection_string(const std::string_view &service_string,
                                         CollectionType &out_collection_type) {
-    int first_word_end = service_string.find(" Collection Service");
-    if (first_word_end == -1) {
+    size_t first_word_end = service_string.find(" Collection Service");
+    if (first_word_end == std::string::npos) {
         return false;
     }
 
@@ -102,8 +103,8 @@ static std::expected<BinCollection, ParseError> parse_collection(const cJSON *co
 }
 
 std::expected<BinCollectionPair, ParseError> parse_response(const std::string_view &response_body) {
-    auto json = std::unique_ptr<cJSON, decltype(cJSON_free) *>{
-        cJSON_ParseWithLength(response_body.data(), response_body.size()), cJSON_free};
+    auto json = std::unique_ptr<cJSON, decltype(cJSON_Delete) *>{
+        cJSON_ParseWithLength(response_body.data(), response_body.size()), cJSON_Delete};
 
     if (json.get() == nullptr) {
         const char *error_ptr = cJSON_GetErrorPtr();
@@ -130,8 +131,8 @@ std::expected<BinCollectionPair, ParseError> parse_response(const std::string_vi
     }
 
     cJSON *second_collection = cJSON_GetArrayItem(collections, 1);
-    if (!cJSON_IsObject(first_collection)) {
-        fprintf(stderr, "Error parsing JSON: $.Collections[0] was not an object\n");
+    if (!cJSON_IsObject(second_collection)) {
+        fprintf(stderr, "Error parsing JSON: $.Collections[1] was not an object\n");
         return std::unexpected(ParseError::InvalidJsonSchema);
     }
 

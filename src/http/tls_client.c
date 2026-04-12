@@ -46,7 +46,7 @@ typedef struct {
 static struct altcp_tls_config *tls_config = NULL;
 
 #ifdef MBEDTLS_DEBUG_C
-static void my_debug(void *ctx, int level, const char *file, int line, const char *str) {
+static void tls_client_debug(void *ctx, int level, const char *file, int line, const char *str) {
     ((void)level);
     fprintf((FILE *)ctx, "%s:%04d: %s", file, line, str);
     fflush((FILE *)ctx);
@@ -194,7 +194,7 @@ static bool tls_client_open(const char *hostname, void *arg) {
         tls_client_connect_to_server_ip(&server_ip, state);
     } else if (err != ERR_INPROGRESS) {
         printf("Error initiating DNS resolving, err=%d\n", err);
-        tls_client_close(state->pcb);
+        tls_client_close(state);
     }
 
     cyw43_arch_lwip_end();
@@ -226,7 +226,7 @@ int8_t https_get(TlsClientRequest request, char *restrict buffer, uint16_t buffe
 
 #ifdef MBEDTLS_DEBUG_C
     mbedtls_debug_set_threshold(2);
-    mbedtls_ssl_conf_dbg(NULL, my_debug, stdout);
+    mbedtls_ssl_conf_dbg(NULL, tls_client_debug, stdout);
 #endif
 
     state->timeout = TlsClientIMEOUT_SECS;
@@ -262,7 +262,9 @@ int8_t https_get(TlsClientRequest request, char *restrict buffer, uint16_t buffe
 
     // We do not support chunked encoding, but the RBC API does not appear to use it.
     // We should check this continues to be the case, however.
-    assert(strstr(state->response, "Transfer-Encoding: chunked") == NULL);
+    if (strstr(state->response, "Transfer-Encoding: chunked") != NULL) {
+        return -5;
+    }
 
     free(state);
     altcp_tls_free_config(tls_config);

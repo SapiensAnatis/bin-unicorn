@@ -11,6 +11,7 @@
 
 #include <array>
 #include <cstdio>
+#include <cstdlib>
 #include <span>
 
 constexpr uint32_t THREE_HOURS_MS = 3 * 60 * 60 * 1000;
@@ -151,7 +152,7 @@ int main() {
     }
 
     cyw43_arch_deinit();
-    delete response_buffer_ptr;
+    free(response_buffer_ptr);
 
     return 0;
 }

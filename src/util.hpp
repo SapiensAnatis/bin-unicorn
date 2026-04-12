@@ -10,15 +10,10 @@ static constexpr char HEX_DIGITS[] = "0123456789ABCDEF";
 /// @brief Convert a character to its hex equivalent, e.g. " " -> "20"
 /// @param num The character to convert.
 /// @return The hex string.
-static std::string to_hex_string(char num) {
+static std::string to_hex_string(unsigned char num) {
     std::string result;
-
-    while (num > 0) {
-        auto remainder = num % 16;
-        result = HEX_DIGITS[remainder] + result;
-        num = num / 16;
-    }
-
+    result += HEX_DIGITS[(num >> 4) & 0xF];
+    result += HEX_DIGITS[num & 0xF];
     return result;
 }
 
