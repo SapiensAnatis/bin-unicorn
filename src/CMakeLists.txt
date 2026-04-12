@@ -1,11 +1,9 @@
-add_executable(bin_unicorn 
-    http/tls_client.c 
+add_executable(bin_unicorn
+    http/tls_client.c
     http/http.cpp
     parsing/parsing.cpp
     ../lib/cJSON/cJSON.c
     main.cpp)
-
-include(address.cmake)
 
 target_compile_definitions(bin_unicorn PRIVATE
     WIFI_SSID=\"${WIFI_SSID}\"

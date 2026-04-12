@@ -25,7 +25,7 @@ endif()
 include(pico_sdk_import.cmake)
 include(pico_extras_import_optional.cmake)
 
-project(JayPicoProjects C CXX ASM)
+project(BinUnicorn C CXX ASM)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_CXX_STANDARD 23)
 # set(PICO_CXX_ENABLE_EXCEPTIONS 1)
@@ -37,6 +37,18 @@ endif()
 # Initialize the SDK
 pico_sdk_init()
 
-include(wifi_credentials.cmake OPTIONAL)
+# We can't set these variables using $env{} in CMakePresets.json due to a bug in the CMake Tools extension
+# https://github.com/microsoft/vscode-cmake-tools/issues/4384
+foreach(var WIFI_SSID WIFI_PASSWORD BIN_UNICORN_HOME_ADDRESS)
+    if(NOT ${var})
+        if(DEFINED ENV{${var}})
+            set(${var} "$ENV{${var}}" CACHE STRING "${var}" FORCE)
+        else()
+            message(FATAL_ERROR "${var} is not set. Export it in your environment "
+                                "(e.g. via direnv) or pass -D${var}=... to CMake. "
+                                "See README.md for details.")
+        endif()
+    endif()
+endforeach()
 
 add_subdirectory(src)
