@@ -4,9 +4,7 @@
 #include <expected>
 #include <tuple>
 
-extern "C" {
-#include "cJSON.h"
-}
+#include <cJSON.h>
 
 namespace parsing {
 

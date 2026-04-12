@@ -1,5 +1,3 @@
-add_library(cjson STATIC ${CMAKE_SOURCE_DIR}/lib/cJSON/cJSON.c ${CMAKE_SOURCE_DIR}/lib/cJSON/cJSON.h)
-target_include_directories(cjson PUBLIC SYSTEM ${CMAKE_SOURCE_DIR}/lib/cJSON)
 
 set(SOURCES 
     http/tls_client.c
@@ -71,9 +69,26 @@ target_link_libraries(bin_unicorn
     pico_stdlib
     hardware_pio
     hardware_dma
-    cjson
 )
 
 pico_add_extra_outputs(bin_unicorn)
+
+include(FetchContent)
+
+FetchContent_Declare(
+    cJSON
+    GIT_REPOSITORY https://github.com/DaveGamble/cJSON.git
+    GIT_SHA        fb16e5cf358798aabb049655975cde8427101056
+)
+
+set(CJSON_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(ENABLE_CJSON_TEST       OFF CACHE BOOL "" FORCE)
+set(ENABLE_CJSON_UTILS      OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_AND_STATIC_LIBS OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(cJSON)
+
+target_link_libraries(bin_unicorn cjson)
+target_include_directories(bin_unicorn PRIVATE SYSTEM ${cjson_SOURCE_DIR})
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
