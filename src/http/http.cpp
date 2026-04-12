@@ -1,7 +1,7 @@
 #include <chrono>
 #include <cstdint>
+#include <cstdio>
 #include <expected>
-#include <iostream>
 #include <optional>
 #include <span>
 #include <string>
@@ -72,21 +72,21 @@ HttpsGetResult fetch_collection_data(const std::string &url_encoded_address,
         request.cert_len = sizeof(READING_GOV_UK_ROOT_CERT),
     };
 
-    std::cout << "Starting HTTPS GET: https://" << request.hostname << request.uri << "\n";
+    printf("Starting HTTPS GET: https://%s%s\n", request.hostname, request.uri);
 
     auto start = std::chrono::high_resolution_clock::now();
 
     int8_t result = https_get(request, buffer.data(), buffer.size());
 
     if (result < 0) {
-        std::cout << "Request failed; err=" << std::to_string(result) << "\n";
+        printf("Request failed; err=%d\n", static_cast<int>(result));
         return static_cast<HttpsGetResult>(result);
     }
 
     auto end = std::chrono::high_resolution_clock::now();
     auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-    std::cout << "Request completed in " << milliseconds.count() << " ms\n";
+    printf("Request completed in %lld ms\n", static_cast<long long>(milliseconds.count()));
 
     return HttpsGetResult::Success;
 }
@@ -97,7 +97,7 @@ std::optional<std::string_view> find_header_value(const std::string_view &buffer
     auto header_end = buffer_string.find("\r\n", header_start);
 
     if (header_start == std::string::npos || header_end == std::string::npos) {
-        std::cerr << "Failed to find header: " << header_name << "\n";
+        fprintf(stderr, "Failed to find header: %s\n", header_name.c_str());
         return std::nullopt;
     }
 
@@ -140,7 +140,7 @@ std::expected<HttpResponse, HttpsParseResult> parse_response(const std::span<cha
     std::string_view status_code_view(buffer_string.begin() + status_code_start, status_code_size);
     uint16_t status_code;
     if (!try_parse_number(status_code_view, status_code)) {
-        std::cerr << "Failed to parse status code\n";
+        fprintf(stderr, "Failed to parse status code\n");
         return std::unexpected(HttpsParseResult::Failure);
     }
 
@@ -148,7 +148,7 @@ std::expected<HttpResponse, HttpsParseResult> parse_response(const std::span<cha
         find_header_value(buffer_string, "Content-Length");
     uint16_t content_length;
     if (!content_length_view || !try_parse_number(*content_length_view, content_length)) {
-        std::cerr << "Failed to parse Content-Length\n";
+        fprintf(stderr, "Failed to parse Content-Length\n");
         return std::unexpected(HttpsParseResult::Failure);
     }
 
@@ -157,7 +157,7 @@ std::expected<HttpResponse, HttpsParseResult> parse_response(const std::span<cha
 
     auto headers_end = buffer_string.find("\r\n\r\n");
     if (headers_end == std::string::npos) {
-        std::cerr << "Failed to find end of response headers\n";
+        fprintf(stderr, "Failed to find end of response headers\n");
         return std::unexpected(HttpsParseResult::Failure);
     }
 

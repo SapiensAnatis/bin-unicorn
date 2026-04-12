@@ -3,7 +3,6 @@
 
 #include <charconv>
 #include <cstdint>
-#include <iostream>
 #include <string>
 
 static constexpr char HEX_DIGITS[] = "0123456789ABCDEF";

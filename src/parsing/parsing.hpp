@@ -14,8 +14,6 @@ struct Date {
     uint8_t day;
 };
 
-std::ostream &operator<<(std::ostream &stream, Date date);
-
 /// @brief A type of bin collection.
 enum class CollectionType : uint8_t { DomesticWaste, FoodWaste, Recycling, GardenWaste };
 

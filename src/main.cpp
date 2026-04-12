@@ -3,9 +3,8 @@
 #endif
 
 #include <array>
-#include <iostream>
+#include <cstdio>
 #include <span>
-#include <string>
 
 #include "util.hpp"
 #include "http/http.hpp"
@@ -26,19 +25,19 @@ constexpr size_t RESPONSE_BUFFER_SIZE = 2048;
 /// @return True if successful, otherwise false.
 bool connect_wifi() {
     if (cyw43_arch_init_with_country(CYW43_COUNTRY_UK)) {
-        std::cout << "Failed to initialise WiFi connection.\n";
+        printf("Failed to initialise WiFi connection.\n");
         return false;
     }
 
     cyw43_arch_enable_sta_mode();
 
-    std::cout << "Connecting to WiFi...\n";
+    printf("Connecting to WiFi...\n");
     if (cyw43_arch_wifi_connect_timeout_ms(BIN_UNICORN_WIFI_SSID, BIN_UNICORN_WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK,
                                            30000)) {
-        std::cout << "Failed to connect to WiFi.\n";
+        printf("Failed to connect to WiFi.\n");
         return false;
     } else {
-        std::cout << "Connected to WiFi.\n";
+        printf("Connected to WiFi.\n");
         return true;
     }
 }
@@ -55,39 +54,39 @@ bool work_loop(const std::string &address, std::span<char> &response_buffer) {
 
     http::HttpsGetResult fetch_result = http::fetch_collection_data(address, response_buffer);
     if (fetch_result != http::HttpsGetResult::Success) {
-        std::cout << "Failed to fetch collection data: error=" << static_cast<int32_t>(fetch_result)
-                  << "\n";
+        printf("Failed to fetch collection data: error=%d\n", static_cast<int>(fetch_result));
         return false;
     }
 
     std::expected<http::HttpResponse, http::HttpsParseResult> response_parse_result =
         http::parse_response(response_buffer);
     if (!response_parse_result.has_value()) {
-        std::cout << "Failed to parse collection data: error="
-                  << static_cast<int32_t>(response_parse_result.error()) << "\n";
+        printf("Failed to parse collection data: error=%d\n",
+               static_cast<int>(response_parse_result.error()));
         return false;
     }
 
     auto response = *response_parse_result;
 
     if (response.status_code != 200) {
-        std::cout << "Failed to parse collection data: received non-200 status code: "
-                  << response.status_code << "\n";
+        printf("Failed to parse collection data: received non-200 status code: %u\n",
+               response.status_code);
         return false;
     }
 
     if (response.content_type != "application/json") {
-        std::cout << "Failed to parse collection data: non 'application/json' Content-Type: '"
-                  << response.content_type.value_or("undefined"sv) << "'\n";
+        std::string_view content_type = response.content_type.value_or("undefined"sv);
+        printf("Failed to parse collection data: non 'application/json' Content-Type: '%.*s'\n",
+               static_cast<int>(content_type.size()), content_type.data());
         return false;
     }
 
     if (response.content_length > response_buffer.size()) {
         // The actual buffer overflow is guarded against in tls_client.c, however we should still
         // check the header to detect that the buffer does not contain the complete response.
-        std::cout << "Failed to parse collection data: Content-Length of "
-                  << static_cast<int32_t>(response.content_length) << " exceeds buffer size of "
-                  << static_cast<int32_t>(response_buffer.size()) << "\n";
+        printf("Failed to parse collection data: Content-Length of %d exceeds buffer size of %d\n",
+               static_cast<int>(response.content_length),
+               static_cast<int>(response_buffer.size()));
         return false;
     }
 
@@ -95,15 +94,16 @@ bool work_loop(const std::string &address, std::span<char> &response_buffer) {
         parsing::parse_response(response.body);
 
     if (!parse_result.has_value()) {
-        std::cout << "Failed to parse collection data: error="
-                  << static_cast<int32_t>(parse_result.error()) << "\n";
+        printf("Failed to parse collection data: error=%d\n",
+               static_cast<int>(parse_result.error()));
         return false;
     }
 
     auto next_collection = std::get<0>(*parse_result);
 
-    std::cout << "Next bin collection is " << static_cast<int32_t>(next_collection.collection_type)
-              << " on " << next_collection.date << '\n';
+    printf("Next bin collection is %d on %04u-%02u-%02u\n",
+           static_cast<int>(next_collection.collection_type), next_collection.date.year,
+           next_collection.date.month, next_collection.date.day);
 
     return true;
 }
@@ -127,7 +127,7 @@ int main() {
 
     char *response_buffer_ptr = (char *)malloc(RESPONSE_BUFFER_SIZE);
     if (response_buffer_ptr == nullptr) {
-        std::cerr << "Failed to allocate response buffer\n";
+        fprintf(stderr, "Failed to allocate response buffer\n");
         return 1;
     }
 
@@ -140,12 +140,12 @@ int main() {
             // sleeping here could lead to stale data being displayed. Consider using NTP instead to
             // re-run the work loop at a specific time when an update is expected.
 
-            std::cout << "Work loop succeeded. Sleeping for " << std::to_string(SUCCESS_SLEEP)
-                      << " ms\n";
+            printf("Work loop succeeded. Sleeping for %lu ms\n",
+                   static_cast<unsigned long>(SUCCESS_SLEEP));
             sleep_ms(SUCCESS_SLEEP);
         } else {
-            std::cout << "Work loop failed! Sleeping for " << std::to_string(ERROR_SLEEP)
-                      << " ms\n";
+            printf("Work loop failed! Sleeping for %lu ms\n",
+                   static_cast<unsigned long>(ERROR_SLEEP));
             sleep_ms(ERROR_SLEEP);
         }
     }
