@@ -23,7 +23,6 @@ typedef struct {
 ///   * -2: Failed to resolve DNS & open connection, or the tls_client_err callback was hit.
 ///   * -3: Failed to allocate client state.
 ///   * -4: Request was apparently successful, but no bytes were written to the buffer.
-///   * -5: Unsupported HTTP response.
 int8_t https_get(TlsClientRequest request, char *buffer, uint16_t buffer_len);
 
 #endif // HTTP_TLS_CLIENT_H_

@@ -163,6 +163,17 @@ std::expected<HttpResponse, HttpsParseResult> parse_response(const std::span<cha
         return std::unexpected(HttpsParseResult::Failure);
     }
 
+    // We do not support chunked encoding, but the RBC API does not appear to use it. We should
+    // check this continues to be the case, however.
+    //
+    // The header could also be sent as Transfer-Encoding: chunked, gzip which erroneously pass this
+    // check, but that shouldn't happen since we don't send Accept-Encoding: gzip.
+    if (auto transfer_encoding = find_header_value(headers_string, "Transfer-Encoding");
+        transfer_encoding == "chunked") {
+        fprintf(stderr, "Chunked encoding is not supported\n");
+        return std::unexpected(HttpsParseResult::UnsupportedResponse);
+    }
+
     std::optional<std::string_view> content_length_view =
         find_header_value(headers_string, "Content-Length");
     uint16_t content_length;

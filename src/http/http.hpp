@@ -20,6 +20,7 @@ enum class HttpsGetResult : int8_t {
 
 enum class HttpsParseResult : int8_t {
     Failure = -1,
+    UnsupportedResponse = -2,
 };
 
 struct HttpResponse {

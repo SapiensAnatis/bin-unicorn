@@ -260,12 +260,6 @@ int8_t https_get(TlsClientRequest request, char *restrict buffer, uint16_t buffe
 
     int response_length = state->response_cursor;
 
-    // We do not support chunked encoding, but the RBC API does not appear to use it.
-    // We should check this continues to be the case, however.
-    if (strstr(state->response, "Transfer-Encoding: chunked") != NULL) {
-        return -5;
-    }
-
     free(state);
     altcp_tls_free_config(tls_config);
 
