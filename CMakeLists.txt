@@ -25,7 +25,7 @@ endif()
 include(pico_sdk_import.cmake)
 include(pico_extras_import_optional.cmake)
 
-project(BinUnicorn C CXX ASM)
+project(bin_unicorn C CXX ASM)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_CXX_STANDARD 23)
 # set(PICO_CXX_ENABLE_EXCEPTIONS 1)
