@@ -5,10 +5,6 @@
  * https://github.com/MichaelBell/Picodon/blob/08d30cfb9d10d6afd966fdd4f9210867cf3bb461/tls_client.c#L268
  */
 
-#ifndef PICO_W
-#error This source file can only be compiled for a Raspberry Pi Pico W.
-#endif
-
 #include "http/tls_client.h"
 
 #include "hardware/structs/rosc.h"
@@ -23,6 +19,10 @@
 
 #include <string.h>
 #include <time.h>
+
+#ifndef RASPBERRYPI_PICO2_W
+#error This source file can only be compiled for a Raspberry Pi Pico 2 W.
+#endif
 
 #define TLS_CLIENT_TIMEOUT_SECS 120
 

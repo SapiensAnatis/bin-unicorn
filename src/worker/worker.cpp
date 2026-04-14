@@ -49,8 +49,7 @@ WorkLoopResult do_work_loop() {
     }
 
     if (response.content_type != "application/json") {
-        std::string_view content_type =
-            response.content_type.value_or(std::string_view("undefined"));
+        std::string_view content_type = response.content_type.value_or(std::string_view("nullopt"));
         printf("Failed to parse collection data: non 'application/json' Content-Type: '%.*s'\n",
                static_cast<int>(content_type.size()), content_type.data());
         return FAIL_RESULT;

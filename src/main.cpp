@@ -1,7 +1,3 @@
-#ifndef PICO_W
-#error This source file can only be compiled for a Raspberry Pi Pico W.
-#endif
-
 #include "worker/worker.hpp"
 
 #include "pico/cyw43_arch.h"
@@ -12,6 +8,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <span>
+
+#ifndef RASPBERRYPI_PICO2_W
+#error This source file can only be compiled for a Raspberry Pi Pico 2 W.
+#endif
 
 static constexpr uint32_t WIFI_CONNECT_FAIL_SLEEP = 5 * 1000;
 

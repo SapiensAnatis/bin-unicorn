@@ -14,7 +14,7 @@ endif()
 # ====================================================================================
 cmake_minimum_required(VERSION 3.20)
 
-set(PICO_BOARD pico_w CACHE STRING "Board type")
+set(PICO_BOARD pico2_w CACHE STRING "Board type")
 set(PICO_DEOPTIMIZED_DEBUG 1)
 
 if (PICO_BOARD STREQUAL pico_w)
@@ -36,5 +36,7 @@ endif()
 
 # Initialize the SDK
 pico_sdk_init()
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 add_subdirectory(src)

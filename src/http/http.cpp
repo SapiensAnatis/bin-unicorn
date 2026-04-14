@@ -66,23 +66,16 @@ static consteval size_t string_length(const std::string_view arg) {
     return arg.size();
 }
 
-static void print_failed_to_find_header(const std::string_view header_name) {
-    fprintf(stderr, "Failed to find header: %.*s\n", static_cast<int>(header_name.length()),
-            header_name.data());
-}
-
 static std::optional<std::string_view> find_header_value(const std::string_view headers_string,
                                                          const std::string_view header_name) {
 
     auto header_start = headers_string.find(header_name);
     if (header_start == std::string_view::npos) {
-        print_failed_to_find_header(header_name);
         return std::nullopt;
     }
 
     auto header_end = headers_string.find("\r\n", header_start);
     if (header_end == std::string_view::npos) {
-        print_failed_to_find_header(header_name);
         return std::nullopt;
     }
 

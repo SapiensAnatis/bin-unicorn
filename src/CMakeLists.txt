@@ -102,3 +102,6 @@ target_link_libraries(bin_unicorn cjson)
 target_include_directories(bin_unicorn PRIVATE SYSTEM ${cjson_SOURCE_DIR})
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+
+# See stdout with the debug probe
+pico_enable_stdio_rtt(bin_unicorn 1)

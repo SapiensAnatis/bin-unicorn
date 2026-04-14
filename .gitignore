@@ -47,6 +47,8 @@ _deps
 pico-sdk
 generated
 build
+cmake-build-debug
+cmake-build-release
 elf2uf2
 pioasm
 
