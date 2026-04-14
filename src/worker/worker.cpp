@@ -10,13 +10,17 @@
 
 namespace worker {
 
-static constexpr uint32_t ERROR_SLEEP_MS = 10'000;
+static constexpr uint32_t ONE_MINUTE_MS = 60 * 1'000;
+static constexpr uint32_t ONE_HOUR_MS = 60 * ONE_MINUTE_MS;
 
-static constexpr uint32_t THREE_HOURS_MS = 3 * 60 * 60 * 1'000;
-static constexpr uint32_t SUCCESS_SLEEP_MS = THREE_HOURS_MS * 2;
+static constexpr uint32_t ERROR_SLEEP_MS = 10 * ONE_MINUTE_MS;
+static constexpr uint32_t SUCCESS_SLEEP_MS = 3 * ONE_HOUR_MS;
 
-static constexpr WorkLoopResult FAIL_RESULT = {.sleep_time_ms = ERROR_SLEEP_MS,
-                                               .next_collection = std::nullopt};
+static constexpr WorkLoopResult FAIL_RESULT = {
+    .success = false,
+    .sleep_time_ms = ERROR_SLEEP_MS,
+    .next_collections = {},
+};
 
 static constexpr size_t RESPONSE_BUFFER_SIZE = 2048;
 
@@ -78,7 +82,11 @@ WorkLoopResult do_work_loop() {
            static_cast<int>(next_collection.collection_type), next_collection.date.year,
            next_collection.date.month, next_collection.date.day);
 
-    return {.sleep_time_ms = SUCCESS_SLEEP_MS, .next_collection = next_collection};
+    return {
+        .success = true,
+        .sleep_time_ms = SUCCESS_SLEEP_MS,
+        .next_collections = parse_result.value(),
+    };
 }
 
 } // namespace worker

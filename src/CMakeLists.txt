@@ -1,5 +1,6 @@
 
 set(SOURCES 
+    display/display.cpp
     http/tls_client.c
     http/http.cpp
     main.cpp
@@ -8,7 +9,8 @@ set(SOURCES
     worker/worker.cpp
 )
 
-set(HEADERS    
+set(HEADERS
+    display/display.hpp
     http/tls_client.h
     http/http.hpp
     mbedtls_config.h

@@ -16,8 +16,16 @@ struct Date {
     uint8_t day;
 };
 
+bool operator==(const Date &a, const Date &b);
+
 /// @brief A type of bin collection.
-enum class CollectionType : uint8_t { DomesticWaste, FoodWaste, Recycling, GardenWaste };
+enum class CollectionType : uint8_t {
+    Unspecified = 0,
+    DomesticWaste,
+    FoodWaste,
+    Recycling,
+    GardenWaste
+};
 
 /// @brief A data object representing a bin collection.
 struct BinCollection {

@@ -4,13 +4,14 @@
 #include "parsing/parsing.hpp"
 
 #include <cstdint>
-#include <optional>
+#include <tuple>
 
 namespace worker {
 
 struct WorkLoopResult {
-    uint32_t sleep_time_ms;
-    std::optional<parsing::BinCollection> next_collection;
+    bool success{};
+    uint32_t sleep_time_ms{};
+    std::tuple<parsing::BinCollection, parsing::BinCollection> next_collections;
 };
 
 WorkLoopResult do_work_loop();

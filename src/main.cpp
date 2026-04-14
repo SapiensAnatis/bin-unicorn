@@ -1,9 +1,10 @@
+#include "display/display.hpp"
+#include "parsing/parsing.hpp"
 #include "worker/worker.hpp"
 
 #include "pico/cyw43_arch.h"
 #include "pico/stdlib.h"
 
-#include <array>
 #include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
@@ -17,7 +18,7 @@ static constexpr uint32_t WIFI_CONNECT_FAIL_SLEEP = 5 * 1000;
 
 /// @brief Connect to the WiFi network using the WIFI_SSID and WIFI_PASSWORD definitions.
 /// @return True if successful, otherwise false.
-bool connect_wifi() {
+static bool connect_wifi() {
     if (cyw43_arch_init_with_country(CYW43_COUNTRY_UK)) {
         printf("Failed to initialise WiFi connection.\n");
         return false;
@@ -36,8 +37,33 @@ bool connect_wifi() {
     }
 }
 
+static void display_collection(parsing::CollectionType type) {
+    using enum parsing::CollectionType;
+
+    switch (type) {
+    case DomesticWaste:
+        display::display_domestic_waste();
+        break;
+    case FoodWaste:
+        display::display_food_waste();
+        break;
+    case Recycling:
+        display::display_recycling();
+        break;
+    case GardenWaste:
+        display::display_garden_waste();
+        break;
+    default:
+        fprintf(stderr, "Cannot display unknown collection type: %d", static_cast<int>(type));
+        display::display_error();
+        break;
+    }
+}
+
 int main() {
     stdio_init_all();
+
+    display::display_init();
 
     bool connected_to_wifi = false;
     do {
@@ -45,25 +71,37 @@ int main() {
 
         if (!connected_to_wifi) {
             cyw43_arch_deinit();
+            display::display_error();
             sleep_ms(WIFI_CONNECT_FAIL_SLEEP);
         }
     } while (!connected_to_wifi);
 
-    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
+    display::clear_error();
+    display::display_wifi_connected();
 
     while (true) {
-        auto [sleep, result_option] = worker::do_work_loop();
+        display::clear_error();
 
-        bool success = result_option.has_value();
+        auto [success, sleep, next_collections] = worker::do_work_loop();
 
         if (success) {
             // TODO: If the device is started in the day prior to the collection data changing,
             // sleeping here could lead to stale data being displayed. Consider using NTP instead to
             // re-run the work loop at a specific time when an update is expected.
-
             printf("Work loop succeeded\n");
+
+            const auto &[coll1, coll2] = next_collections;
+
+            display_collection(coll1.collection_type);
+
+            // Sometimes two collections occur on the same day - in which case both should be
+            // displayed.
+            if (coll1.date == coll2.date) {
+                display_collection(coll2.collection_type);
+            }
         } else {
             printf("Work loop failed!\n");
+            display::display_error();
         }
 
         printf("Sleeping for %" PRIu32 " ms.\n", sleep);

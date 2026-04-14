@@ -103,6 +103,10 @@ static std::expected<BinCollection, ParseError> parse_collection(const cJSON *co
     return out_bin_collection;
 }
 
+bool operator==(const Date &a, const Date &b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+}
+
 std::expected<BinCollectionPair, ParseError> parse_response(const std::string_view &response_body) {
     alignas(max_align_t) std::array<std::byte, 4096> arena_buffer{};
     auto arena = Arena{arena_buffer.data(), arena_buffer.size()};
