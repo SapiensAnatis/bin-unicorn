@@ -1,5 +1,5 @@
 {
-    "version": 6,
+    "version": 10,
     "cmakeMinimumRequired": {
         "major": 3,
         "minor": 25,
@@ -7,18 +7,15 @@
     },
     "configurePresets": [
         {
-            "name": "base",
-            "generator": "Ninja",
-            "hidden": true
-        },
-        {
-            "name": "debug",
-            "inherits": "base",
-            "displayName": "Debug",
-            "binaryDir": "${sourceDir}/build",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
+            "$comment": [
+                "We use the multi-config generator to play nice with the Pico VSCode extension",
+                "It expects the build directory to always be build/ which doesn't work with separate Debug/Release configure steps",
+                "Surprisingly, this doesn't appear to cause any issues with the Pico SDK"
+            ],
+            "name": "default",
+            "generator": "Ninja Multi-Config",
+            "displayName": "Default",
+            "binaryDir": "${sourceDir}/build"
         }
     ],
     "buildPresets": [
@@ -29,9 +26,17 @@
         },
         {
             "name": "debug",
+            "configuration": "Debug",
             "inherits": "base",
             "displayName": "Debug",
-            "configurePreset": "debug"
+            "configurePreset": "default"
+        },
+        {
+            "name": "release",
+            "configuration": "RelWithDebInfo",
+            "inherits": "base",
+            "displayName": "RelWithDebInfo",
+            "configurePreset": "default"
         }
     ]
 }
