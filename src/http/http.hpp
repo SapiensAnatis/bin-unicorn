@@ -1,6 +1,7 @@
 #ifndef HTTP_HTTP_HPP
 #define HTTP_HTTP_HPP
 
+#include <chrono>
 #include <cstdint>
 #include <expected>
 #include <optional>
@@ -24,6 +25,7 @@ struct HttpResponse {
     uint16_t status_code;
     uint16_t content_length;
     std::optional<std::string_view> content_type;
+    std::optional<std::chrono::year_month_day> server_date;
     std::string_view body;
 };
 

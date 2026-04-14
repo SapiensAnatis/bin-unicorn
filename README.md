@@ -1,10 +1,8 @@
 # bin-unicorn
 
-Embedded application that interfaces with the [Reading Borough Council API](https://api.reading.gov.uk/) to fetch information about the next scheduled bin collection and display it.
+Embedded application that interfaces with the [Reading Borough Council API](https://api.reading.gov.uk/) to fetch information about the next scheduled bin collection and display it. Targets the Raspberry Pi Pico W (RP2040) and runs on bare metal.
 
-Targets the Raspberry Pi Pico W (RP2040) and runs on bare metal.
-
-It lights up LEDs corresponding to the next bin collection, as well as status LEDs.
+It lights up LEDs corresponding to the next bin collection, as well as status LEDs. Collections will only be displayed if they are occurring on the current date or the next day; the device is intended to be more of a notification system than a calendar.
 
 ## Hardware
 

@@ -6,6 +6,7 @@ extern "C" {
 #include "http/tls_client.h"
 }
 
+#include <array>
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
@@ -84,6 +85,44 @@ static std::optional<std::string_view> find_header_value(const std::string_view 
 
     return std::string_view(headers_string.begin() + header_value_start,
                             headers_string.begin() + header_end);
+}
+
+static std::optional<std::chrono::year_month_day>
+parse_date_header(const std::string_view date_header) {
+    // IMF-fixdate format: "Tue, 11 Feb 2025 22:17:30 GMT"
+    //                      0123456789012345
+    // We only need up to the year (index 12-15), so 16 chars minimum.
+    if (date_header.size() < 16) {
+        return std::nullopt;
+    }
+
+    uint8_t day = 0;
+    if (!try_parse_number(date_header.substr(5, 2), day)) {
+        return std::nullopt;
+    }
+
+    static constexpr std::array<std::string_view, 12> month_names = {
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    };
+
+    std::string_view month_str = date_header.substr(8, 3);
+    uint8_t month = 0;
+    for (uint8_t i = 0; i < month_names.size(); i++) {
+        if (month_str == month_names[i]) {
+            month = i + 1;
+            break;
+        }
+    }
+    if (month == 0) {
+        return std::nullopt;
+    }
+
+    uint16_t year = 0;
+    if (!try_parse_number(date_header.substr(12, 4), year)) {
+        return std::nullopt;
+    }
+
+    return std::chrono::year(year) / std::chrono::month(month) / std::chrono::day(day);
 }
 
 std::expected<std::monostate, HttpsGetError> fetch_collection_data(std::span<char> &buffer) {
@@ -188,13 +227,19 @@ std::expected<HttpResponse, HttpsParseError> parse_http_response(const std::span
     std::optional<std::string_view> content_type_view =
         find_header_value(headers_string, "Content-Type");
 
+    std::optional<std::chrono::year_month_day> server_date =
+        find_header_value(headers_string, "Date").and_then(parse_date_header);
+
     std::string_view body =
         buffer_string.substr(headers_end + string_length("\r\n\r\n"), content_length);
 
-    return HttpResponse{.status_code = status_code,
-                        .content_length = content_length,
-                        .content_type = content_type_view,
-                        .body = body};
+    return HttpResponse{
+        .status_code = status_code,
+        .content_length = content_length,
+        .content_type = content_type_view,
+        .server_date = server_date,
+        .body = body,
+    };
 }
 
 } // namespace bin_unicorn

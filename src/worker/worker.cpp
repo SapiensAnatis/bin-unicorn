@@ -19,6 +19,7 @@ static constexpr uint32_t SUCCESS_SLEEP_MS = 3 * ONE_HOUR_MS;
 static constexpr WorkLoopResult FAIL_RESULT = {
     .success = false,
     .sleep_time_ms = ERROR_SLEEP_MS,
+    .rbc_server_date = {},
     .next_collections = {},
 };
 
@@ -67,8 +68,17 @@ WorkLoopResult do_work_loop() {
         return FAIL_RESULT;
     }
 
-    std::expected<BinCollectionPair, ParseError> parse_result =
-        parse_json_response(response.body);
+    if (response.server_date.has_value()) {
+        printf("Server time as returned in the Date header was %04d-%02u-%02u\n",
+               static_cast<int>(response.server_date->year()),
+               static_cast<unsigned>(response.server_date->month()),
+               static_cast<unsigned>(response.server_date->day()));
+    } else {
+        printf("Server time unknown: missing or malformed Date header");
+        return FAIL_RESULT;
+    }
+
+    std::expected<BinCollectionPair, ParseError> parse_result = parse_json_response(response.body);
 
     if (!parse_result.has_value()) {
         printf("Failed to parse collection data: error=%d\n",
@@ -78,13 +88,16 @@ WorkLoopResult do_work_loop() {
 
     auto next_collection = std::get<0>(*parse_result);
 
-    printf("Next bin collection is %d on %04u-%02u-%02u\n",
-           static_cast<int>(next_collection.collection_type), next_collection.date.year,
-           next_collection.date.month, next_collection.date.day);
+    printf("Next bin collection is %d on %04d-%02u-%02u\n",
+           static_cast<int>(next_collection.collection_type),
+           static_cast<int>(next_collection.date.year()),
+           static_cast<unsigned>(next_collection.date.month()),
+           static_cast<unsigned>(next_collection.date.day()));
 
     return {
         .success = true,
         .sleep_time_ms = SUCCESS_SLEEP_MS,
+        .rbc_server_date = response.server_date.value(),
         .next_collections = parse_result.value(),
     };
 }

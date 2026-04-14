@@ -82,22 +82,27 @@ int main() {
     while (true) {
         bin_unicorn::clear_error();
 
-        auto [success, sleep, next_collections] = bin_unicorn::do_work_loop();
+        auto [success, sleep, server_date, next_collections] = bin_unicorn::do_work_loop();
 
         if (success) {
-            // TODO: If the device is started in the day prior to the collection data changing,
-            // sleeping here could lead to stale data being displayed. Consider using NTP instead to
-            // re-run the work loop at a specific time when an update is expected.
             printf("Work loop succeeded\n");
 
             const auto &[coll1, coll2] = next_collections;
 
-            display_collection(coll1.collection_type);
+            // Instead of setting up NTP, we will be lazy and use the RBC API server date (as
+            // returned in the Date header) as an approximate source for the current time.
+            std::chrono::days days_to_collection =
+                std::chrono::sys_days(coll1.date) - std::chrono::sys_days(server_date);
 
-            // Sometimes two collections occur on the same day - in which case both should be
-            // displayed.
-            if (coll1.date == coll2.date) {
-                display_collection(coll2.collection_type);
+            // Display collections either day-of or on the day before
+            if (days_to_collection.count() <= 1) {
+                display_collection(coll1.collection_type);
+
+                // Sometimes two collections occur on the same day - in which case both should be
+                // displayed.
+                if (coll1.date == coll2.date) {
+                    display_collection(coll2.collection_type);
+                }
             }
         } else {
             printf("Work loop failed!\n");

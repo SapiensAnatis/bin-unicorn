@@ -22,7 +22,7 @@ template <size_t MaxLen> struct FixedString {
     constexpr operator std::string_view() const { return {data, len}; }
 };
 
-static consteval bool is_url_safe(char c) {
+inline consteval bool is_url_safe(char c) {
     return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' ||
            c == '.' || c == '_' || c == '~';
 }
@@ -31,7 +31,7 @@ static consteval bool is_url_safe(char c) {
 /// @tparam N The size of the input string literal (including null terminator).
 /// @param input The input string literal.
 /// @return A FixedString containing the URL-encoded result.
-template <size_t N> consteval auto url_encode(const char (&input)[N]) {
+template <size_t N> inline consteval auto url_encode(const char (&input)[N]) {
     FixedString<3 * (N - 1)> result;
 
     for (size_t i = 0; i < N - 1; ++i) {
@@ -49,7 +49,8 @@ template <size_t N> consteval auto url_encode(const char (&input)[N]) {
 }
 
 /// @brief Concatenate a string literal and a FixedString at compile time.
-template <size_t N, size_t M> consteval auto concat(const char (&a)[N], const FixedString<M> &b) {
+template <size_t N, size_t M>
+inline consteval auto concat(const char (&a)[N], const FixedString<M> &b) {
     FixedString<(N - 1) + M> result;
     for (size_t i = 0; i < N - 1; ++i) {
         result.push(a[i]);
@@ -66,7 +67,7 @@ template <size_t N, size_t M> consteval auto concat(const char (&a)[N], const Fi
 /// @param out A reference to a number to assign the result to, if parsing is successful.
 /// @return A boolean indicating whether parsing succeeded.
 template <std::integral TNumber>
-static bool try_parse_number(const std::string_view &input, TNumber &out) {
+inline bool try_parse_number(const std::string_view &input, TNumber &out) {
     const std::from_chars_result result =
         std::from_chars(input.data(), input.data() + input.size(), out);
 

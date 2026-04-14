@@ -5,6 +5,7 @@
 
 #include <array>
 #include <charconv>
+#include <chrono>
 #include <cstddef>
 #include <cstdio>
 #include <expected>
@@ -42,7 +43,8 @@ static bool try_parse_collection_string(const std::string_view &service_string,
     return false;
 }
 
-static bool try_parse_date(const std::string_view &date_time_string, Date &out_date) {
+static bool try_parse_date(const std::string_view &date_time_string,
+                           std::chrono::year_month_day &out_date) {
     // We receive dates in the format DD/MM/YYYY 00:00:00
     // We don't care about the time, but need at least "DD/MM/YYYY" (10 chars)
 
@@ -65,7 +67,7 @@ static bool try_parse_date(const std::string_view &date_time_string, Date &out_d
         return false;
     }
 
-    out_date = Date{.year = year, .month = month, .day = day};
+    out_date = std::chrono::year(year) / std::chrono::month(month) / std::chrono::day(day);
 
     return true;
 }
@@ -83,7 +85,7 @@ static std::expected<BinCollection, ParseError> parse_collection(const cJSON *co
         return std::unexpected(ParseError::InvalidJsonSchema);
     }
 
-    Date parsed_date;
+    std::chrono::year_month_day parsed_date;
     if (!try_parse_date(std::string_view(date->valuestring), parsed_date)) {
         fprintf(stderr, "Error parsing JSON: $.Collections[0].Date '%s' was not a valid date\n",
                 date->valuestring);
@@ -105,10 +107,6 @@ static std::expected<BinCollection, ParseError> parse_collection(const cJSON *co
     out_bin_collection.collection_type = parsed_collection_type;
 
     return out_bin_collection;
-}
-
-bool operator==(const Date &a, const Date &b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
 static std::expected<BinCollectionPair, ParseError>

@@ -3,20 +3,12 @@
 
 #include <cJSON.h>
 
-#include <cstdint>
+#include <chrono>
 #include <expected>
 #include <string_view>
 #include <tuple>
 
 namespace bin_unicorn {
-
-struct Date {
-    uint16_t year;
-    uint8_t month;
-    uint8_t day;
-};
-
-bool operator==(const Date &a, const Date &b);
 
 /// @brief A type of bin collection.
 enum class CollectionType : uint8_t {
@@ -29,11 +21,11 @@ enum class CollectionType : uint8_t {
 
 /// @brief A data object representing a bin collection.
 struct BinCollection {
-    Date date;
+    std::chrono::year_month_day date;
     CollectionType collection_type;
 };
 
-typedef std::tuple<BinCollection, BinCollection> BinCollectionPair;
+using BinCollectionPair = std::tuple<BinCollection, BinCollection>;
 
 /// @brief Represents the result of trying to parse a bin collection.
 enum class ParseError {
