@@ -46,7 +46,7 @@ enum class ParseError {
 /// @brief Attempt to parse the two first bin collections in the array.
 /// @param response_body A string_view of the JSON response body returned from the RBC API.
 /// @returns A value indicating parse status (failure/success).
-std::expected<BinCollectionPair, ParseError> parse_json_response(const std::string_view &response_body);
+std::expected<BinCollectionPair, ParseError> parse_json_response(std::string_view response_body);
 
 } // namespace bin_unicorn
 

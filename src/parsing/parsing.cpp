@@ -13,6 +13,10 @@
 
 namespace bin_unicorn {
 
+struct cJSONDeleter {
+    void operator()(cJSON *ptr) { cJSON_Delete(ptr); }
+};
+
 static bool try_parse_collection_string(const std::string_view &service_string,
                                         CollectionType &out_collection_type) {
     size_t first_word_end = service_string.find(" Collection Service");
@@ -107,27 +111,10 @@ bool operator==(const Date &a, const Date &b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
-std::expected<BinCollectionPair, ParseError> parse_json_response(const std::string_view &response_body) {
-    alignas(max_align_t) std::array<std::byte, 4096> arena_buffer{};
-    auto arena = Arena{arena_buffer.data(), arena_buffer.size()};
-    arena_set_current(arena);
-
-    // It's not thread-safe to call cJSON_InitHooks more than once, but we only have one core :)
-    cJSON_Hooks hooks{.malloc_fn = arena_malloc, .free_fn = arena_free};
-    cJSON_InitHooks(&hooks);
-
-    // Always clean up the arena, even if we return early
-    struct ArenaGuard {
-        ~ArenaGuard() {
-            cJSON_InitHooks(nullptr); // Reset hooks
-            arena_unset_current();
-        }
-    };
-
-    ArenaGuard guard;
-
-    auto json = std::unique_ptr<cJSON, decltype(cJSON_Delete) *>{
-        cJSON_ParseWithLength(response_body.data(), response_body.size()), cJSON_Delete};
+static std::expected<BinCollectionPair, ParseError>
+parse_json_response_inner(const std::string_view response_body) {
+    auto json = std::unique_ptr<cJSON, cJSONDeleter>{
+        cJSON_ParseWithLength(response_body.data(), response_body.size())};
 
     if (json.get() == nullptr) {
         const char *error_ptr = cJSON_GetErrorPtr();
@@ -166,6 +153,26 @@ std::expected<BinCollectionPair, ParseError> parse_json_response(const std::stri
     }
 
     return BinCollectionPair{*first_parse_result, *second_parse_result};
+}
+
+std::expected<BinCollectionPair, ParseError>
+parse_json_response(const std::string_view response_body) {
+    alignas(max_align_t) std::array<std::byte, 4096> arena_buffer{};
+
+    auto arena = Arena{arena_buffer.data(), arena_buffer.size()};
+    arena_set_current(arena);
+
+    // It's not thread-safe to call cJSON_InitHooks more than once, but we are only dealing with
+    // cJSON from one core.
+    cJSON_Hooks hooks{.malloc_fn = arena_malloc, .free_fn = arena_free};
+    cJSON_InitHooks(&hooks);
+
+    auto result = parse_json_response_inner(response_body);
+
+    cJSON_InitHooks(nullptr); // Reset hooks
+    arena_unset_current();
+
+    return result;
 }
 
 } // namespace bin_unicorn
