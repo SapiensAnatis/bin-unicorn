@@ -2,7 +2,9 @@
 
 Embedded application that interfaces with the [Reading Borough Council API](https://api.reading.gov.uk/) to fetch information about the next scheduled bin collection and display it. Targets the Raspberry Pi Pico W (RP2040) and runs on bare metal.
 
-It lights up LEDs corresponding to the next bin collection, as well as status LEDs. Collections will only be displayed if they are occurring on the current date or the next day; the device is intended to be more of a notification system than a calendar.
+The app lights up LEDs corresponding to the next bin collection, as well as status LEDs. Collections will only be displayed if they are occurring on the current date or the next day; the device is intended to be more of a notification system than a calendar.
+
+Once the app has successfully retrieved data on startup, it will poll the API every three hours to detect changes in data.
 
 ## Hardware
 
@@ -81,3 +83,23 @@ cmake --build --preset release
 ```
 
 This will make the code much faster - for example, HTTP requests take 1 second instead of 5 seconds.
+
+## Porting
+
+If you want to port this software to another microcontroller (like an ESP32), you are more than welcome to try! It should not be too difficult and I have made some effort to contain the usages of Pico-specific functionality to certain .cpp files. Most of the higher-level logic for interacting with the API and parsing the result is platform-agnostic.
+
+Pico-specific files will have a preprocessor directive in them and will fail to build when not targeting the Pico:
+
+```cpp
+#ifndef RASPBERRYPI_PICO2_W
+#error This source file can only be compiled for a Raspberry Pi Pico 2 W.
+#endif
+```
+
+## Roadmap
+
+This app is mostly complete, but some nice-to-have features would be:
+
+- Expose a configuration interface so that the presently compile-time settings for the WiFI SSID and password, as well as home address, can be changed after the software is flashed.
+- Allow over-the-air updates of the software in case it needs to be patched.
+- Instead of sleeping for 3 hours after each successful request, use the date of the next collection to set a wake-up time further in the future. Could reduce power usage and enable the device to be battery-powered instead of needing to be plugged in.
