@@ -1,3 +1,7 @@
+# Wiring
+
+LEDs are 5mm and are wired up to the GPIO pins behind a 330 Ohm resistor.
+
 # GPIO pins
 
 | Pin  | LED              | Colour  | Purpose                  |
