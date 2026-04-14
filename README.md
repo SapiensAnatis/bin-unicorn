@@ -80,4 +80,4 @@ It is advisable if you are deploying a finalised build to use a release build:
 cmake --build --preset release
 ```
 
-This will make the code much faster - for example, HTTP requests take 5 seconds instead of 30 seconds!
+This will make the code much faster - for example, HTTP requests take 1 second instead of 5 seconds.
