@@ -6,7 +6,7 @@
 #error This source file can only be compiled for a Raspberry Pi Pico 2 W.
 #endif
 
-namespace display {
+namespace bin_unicorn {
 
 /// @brief
 static constexpr uint WIFI_CONNECTED_LED_GPIO = 10; ///< Pin attached to a diffused blue LED.
@@ -85,4 +85,4 @@ void display_domestic_waste() {
     gpio_put(GENERAL_BIN_LED_GPIO, true);
 }
 
-} // namespace display
+} // namespace bin_unicorn

@@ -13,7 +13,7 @@ extern "C" {
 #include <optional>
 #include <span>
 
-namespace http {
+namespace bin_unicorn {
 
 // ISRG Root X1
 // Expiry: Mon, 04 Jun 2035 11:04:38 GMT
@@ -122,7 +122,7 @@ std::expected<std::monostate, HttpsGetError> fetch_collection_data(std::span<cha
     return {};
 }
 
-std::expected<HttpResponse, HttpsParseError> parse_response(const std::span<char> &buffer) {
+std::expected<HttpResponse, HttpsParseError> parse_http_response(const std::span<char> &buffer) {
     /* A raw HTTP response looks like:
      *
      *   HTTP/1.1 200 OK
@@ -197,4 +197,4 @@ std::expected<HttpResponse, HttpsParseError> parse_response(const std::span<char
                         .body = body};
 }
 
-} // namespace http
+} // namespace bin_unicorn

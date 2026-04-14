@@ -4,7 +4,7 @@
 #include <cassert>
 #include <cstdio>
 
-namespace parsing {
+namespace bin_unicorn {
 
 static Arena *current_arena = nullptr;
 
@@ -33,4 +33,4 @@ void arena_free(void *ptr) {
 
 void arena_unset_current() { current_arena = nullptr; }
 
-} // namespace parsing
+} // namespace bin_unicorn

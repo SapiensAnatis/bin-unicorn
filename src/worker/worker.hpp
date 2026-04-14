@@ -6,16 +6,16 @@
 #include <cstdint>
 #include <tuple>
 
-namespace worker {
+namespace bin_unicorn {
 
 struct WorkLoopResult {
     bool success{};
     uint32_t sleep_time_ms{};
-    std::tuple<parsing::BinCollection, parsing::BinCollection> next_collections;
+    std::tuple<BinCollection, BinCollection> next_collections;
 };
 
 WorkLoopResult do_work_loop();
 
-} // namespace worker
+} // namespace bin_unicorn
 
 #endif // WORKER_H_

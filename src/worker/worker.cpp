@@ -8,7 +8,7 @@
 #include <expected>
 #include <span>
 
-namespace worker {
+namespace bin_unicorn {
 
 static constexpr uint32_t ONE_MINUTE_MS = 60 * 1'000;
 static constexpr uint32_t ONE_HOUR_MS = 60 * ONE_MINUTE_MS;
@@ -29,15 +29,15 @@ WorkLoopResult do_work_loop() {
         http_buffer_array{}; // should be zeroed, in case a fake Content-Length is sent
     std::span<char> http_buffer(http_buffer_array);
 
-    auto fetch_result = http::fetch_collection_data(http_buffer);
+    auto fetch_result = fetch_collection_data(http_buffer);
     if (!fetch_result.has_value()) {
         printf("Failed to fetch collection data: error=%d\n",
                static_cast<int>(fetch_result.error()));
         return FAIL_RESULT;
     }
 
-    std::expected<http::HttpResponse, http::HttpsParseError> response_parse_result =
-        http::parse_response(http_buffer);
+    std::expected<HttpResponse, HttpsParseError> response_parse_result =
+        parse_http_response(http_buffer);
     if (!response_parse_result.has_value()) {
         printf("Failed to parse collection data: error=%d\n",
                static_cast<int>(response_parse_result.error()));
@@ -67,8 +67,8 @@ WorkLoopResult do_work_loop() {
         return FAIL_RESULT;
     }
 
-    std::expected<parsing::BinCollectionPair, parsing::ParseError> parse_result =
-        parsing::parse_response(response.body);
+    std::expected<BinCollectionPair, ParseError> parse_result =
+        parse_json_response(response.body);
 
     if (!parse_result.has_value()) {
         printf("Failed to parse collection data: error=%d\n",
@@ -89,4 +89,4 @@ WorkLoopResult do_work_loop() {
     };
 }
 
-} // namespace worker
+} // namespace bin_unicorn

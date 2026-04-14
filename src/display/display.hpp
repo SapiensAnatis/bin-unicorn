@@ -1,7 +1,7 @@
 #ifndef DISPLAY_DISPLAY_H_
 #define DISPLAY_DISPLAY_H_
 
-namespace display {
+namespace bin_unicorn {
 
 /// @brief Initialises the relevant GPIO ports for display.
 void display_init();
@@ -24,6 +24,6 @@ void display_garden_waste();
 /// @brief Show that the next collection is general waste by lighting up a white LED.
 void display_domestic_waste();
 
-} // namespace display
+} // namespace bin_unicorn
 
 #endif // DISPLAY_DISPLAY_H_

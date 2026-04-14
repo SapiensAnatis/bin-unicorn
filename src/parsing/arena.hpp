@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-namespace parsing {
+namespace bin_unicorn {
 
 /*
  * This arena is useful for allowing cJSON to allocate without using malloc/free or accessing the
@@ -30,6 +30,6 @@ void arena_free(void *ptr);
 
 void arena_unset_current();
 
-} // namespace parsing
+} // namespace bin_unicorn
 
 #endif // PARSING_ARENA_H_

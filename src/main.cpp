@@ -37,25 +37,25 @@ static bool connect_wifi() {
     }
 }
 
-static void display_collection(parsing::CollectionType type) {
-    using enum parsing::CollectionType;
+static void display_collection(bin_unicorn::CollectionType type) {
+    using enum bin_unicorn::CollectionType;
 
     switch (type) {
     case DomesticWaste:
-        display::display_domestic_waste();
+        bin_unicorn::display_domestic_waste();
         break;
     case FoodWaste:
-        display::display_food_waste();
+        bin_unicorn::display_food_waste();
         break;
     case Recycling:
-        display::display_recycling();
+        bin_unicorn::display_recycling();
         break;
     case GardenWaste:
-        display::display_garden_waste();
+        bin_unicorn::display_garden_waste();
         break;
     default:
         fprintf(stderr, "Cannot display unknown collection type: %d", static_cast<int>(type));
-        display::display_error();
+        bin_unicorn::display_error();
         break;
     }
 }
@@ -63,7 +63,7 @@ static void display_collection(parsing::CollectionType type) {
 int main() {
     stdio_init_all();
 
-    display::display_init();
+    bin_unicorn::display_init();
 
     bool connected_to_wifi = false;
     do {
@@ -71,18 +71,18 @@ int main() {
 
         if (!connected_to_wifi) {
             cyw43_arch_deinit();
-            display::display_error();
+            bin_unicorn::display_error();
             sleep_ms(WIFI_CONNECT_FAIL_SLEEP);
         }
     } while (!connected_to_wifi);
 
-    display::clear_error();
-    display::display_wifi_connected();
+    bin_unicorn::clear_error();
+    bin_unicorn::display_wifi_connected();
 
     while (true) {
-        display::clear_error();
+        bin_unicorn::clear_error();
 
-        auto [success, sleep, next_collections] = worker::do_work_loop();
+        auto [success, sleep, next_collections] = bin_unicorn::do_work_loop();
 
         if (success) {
             // TODO: If the device is started in the day prior to the collection data changing,
@@ -101,7 +101,7 @@ int main() {
             }
         } else {
             printf("Work loop failed!\n");
-            display::display_error();
+            bin_unicorn::display_error();
         }
 
         printf("Sleeping for %" PRIu32 " ms.\n", sleep);

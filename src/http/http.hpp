@@ -8,7 +8,7 @@
 #include <string_view>
 #include <variant>
 
-namespace http {
+namespace bin_unicorn {
 
 enum class HttpsGetError : int8_t {
     FailedToFormatRequest = -1,
@@ -37,8 +37,8 @@ std::expected<std::monostate, HttpsGetError> fetch_collection_data(std::span<cha
 /// headers.
 /// @param buffer The buffer that the UTF-8 response was written to.
 /// @return A @ref HttpResponse, or a @ref HttpsParseError error if parsing failed.
-std::expected<HttpResponse, HttpsParseError> parse_response(const std::span<char> &buffer);
+std::expected<HttpResponse, HttpsParseError> parse_http_response(const std::span<char> &buffer);
 
-} // namespace http
+} // namespace bin_unicorn
 
 #endif // HTTP_HTTP_H_

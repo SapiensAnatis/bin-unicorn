@@ -11,7 +11,7 @@
 #include <memory>
 #include <string_view>
 
-namespace parsing {
+namespace bin_unicorn {
 
 static bool try_parse_collection_string(const std::string_view &service_string,
                                         CollectionType &out_collection_type) {
@@ -107,7 +107,7 @@ bool operator==(const Date &a, const Date &b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
-std::expected<BinCollectionPair, ParseError> parse_response(const std::string_view &response_body) {
+std::expected<BinCollectionPair, ParseError> parse_json_response(const std::string_view &response_body) {
     alignas(max_align_t) std::array<std::byte, 4096> arena_buffer{};
     auto arena = Arena{arena_buffer.data(), arena_buffer.size()};
     arena_set_current(arena);
@@ -168,4 +168,4 @@ std::expected<BinCollectionPair, ParseError> parse_response(const std::string_vi
     return BinCollectionPair{*first_parse_result, *second_parse_result};
 }
 
-} // namespace parsing
+} // namespace bin_unicorn
