@@ -1,5 +1,5 @@
-#ifndef PARSING_ARENA_H_
-#define PARSING_ARENA_H_
+#ifndef PARSING_ARENA_HPP
+#define PARSING_ARENA_HPP
 
 #include <cstddef>
 
@@ -32,4 +32,4 @@ void arena_unset_current();
 
 } // namespace bin_unicorn
 
-#endif // PARSING_ARENA_H_
+#endif // PARSING_ARENA_HPP

@@ -1,5 +1,5 @@
-#ifndef DISPLAY_DISPLAY_H_
-#define DISPLAY_DISPLAY_H_
+#ifndef DISPLAY_DISPLAY_HPP
+#define DISPLAY_DISPLAY_HPP
 
 namespace bin_unicorn {
 
@@ -26,4 +26,4 @@ void display_domestic_waste();
 
 } // namespace bin_unicorn
 
-#endif // DISPLAY_DISPLAY_H_
+#endif // DISPLAY_DISPLAY_HPP

@@ -1,5 +1,5 @@
-#ifndef HTTP_HTTP_H_
-#define HTTP_HTTP_H_
+#ifndef HTTP_HTTP_HPP
+#define HTTP_HTTP_HPP
 
 #include <cstdint>
 #include <expected>
@@ -41,4 +41,4 @@ std::expected<HttpResponse, HttpsParseError> parse_http_response(const std::span
 
 } // namespace bin_unicorn
 
-#endif // HTTP_HTTP_H_
+#endif // HTTP_HTTP_HPP

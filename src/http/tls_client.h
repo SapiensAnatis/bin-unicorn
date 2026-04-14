@@ -1,5 +1,5 @@
-#ifndef HTTP_TLS_CLIENT_H_
-#define HTTP_TLS_CLIENT_H_
+#ifndef HTTP_TLS_CLIENT_H
+#define HTTP_TLS_CLIENT_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -30,4 +30,4 @@ typedef struct {
 ///   * -4: Request was apparently successful, but no bytes were written to the buffer.
 int32_t tls_request(TlsClientRequest request, char *buffer, uint16_t buffer_len);
 
-#endif // HTTP_TLS_CLIENT_H_
+#endif // HTTP_TLS_CLIENT_H

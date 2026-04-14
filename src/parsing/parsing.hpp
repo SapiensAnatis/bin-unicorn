@@ -1,5 +1,5 @@
-#ifndef PARSING_PARSING_H_
-#define PARSING_PARSING_H_
+#ifndef PARSING_PARSING_HPP
+#define PARSING_PARSING_HPP
 
 #include <cJSON.h>
 
@@ -50,4 +50,4 @@ std::expected<BinCollectionPair, ParseError> parse_json_response(std::string_vie
 
 } // namespace bin_unicorn
 
-#endif // PARSING_PARSING_H_
+#endif // PARSING_PARSING_HPP

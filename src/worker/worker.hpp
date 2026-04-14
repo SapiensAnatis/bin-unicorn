@@ -1,5 +1,5 @@
-#ifndef WORKER_H_
-#define WORKER_H_
+#ifndef WORKER_HPP
+#define WORKER_HPP
 
 #include "parsing/parsing.hpp"
 
@@ -18,4 +18,4 @@ WorkLoopResult do_work_loop();
 
 } // namespace bin_unicorn
 
-#endif // WORKER_H_
+#endif // WORKER_HPP

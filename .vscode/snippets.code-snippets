@@ -1,0 +1,15 @@
+{
+	"Include guard": {
+		"prefix": [
+			"guard",
+			"gggg"
+		],
+		"body": [
+			"#ifndef ${RELATIVE_FILEPATH/(?:^.*src\\/)?(\\w+)(?!\\w*$)|(\\W)|(\\w+)$/${1:/upcase}${2:+_}${3:/upcase}/g}",
+			"#define ${RELATIVE_FILEPATH/(?:^.*src\\/)?(\\w+)(?!\\w*$)|(\\W)|(\\w+)$/${1:/upcase}${2:+_}${3:/upcase}/g}",
+			"",
+			"",
+			"#endif//${RELATIVE_FILEPATH/(?:^.*src\\/)?(\\w+)(?!\\w*$)|(\\W)|(\\w+)$/${1:/upcase}${2:+_}${3:/upcase}/g}"
+		]
+	}
+}

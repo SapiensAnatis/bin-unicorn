@@ -1,5 +1,5 @@
-#ifndef UTIL_H_
-#define UTIL_H_
+#ifndef UTIL_HPP
+#define UTIL_HPP
 
 #include <charconv>
 #include <concepts>
@@ -77,4 +77,4 @@ static bool try_parse_number(const std::string_view &input, TNumber &out) {
     return true;
 }
 
-#endif // UTIL_H_
+#endif // UTIL_HPP
