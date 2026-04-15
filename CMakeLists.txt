@@ -75,14 +75,12 @@ target_sources(bin_unicorn
 # We can't set these variables using $env{} in CMakePresets.json due to a bug in the CMake Tools extension
 # https://github.com/microsoft/vscode-cmake-tools/issues/4384
 foreach(var BIN_UNICORN_WIFI_SSID BIN_UNICORN_WIFI_PASSWORD BIN_UNICORN_HOME_ADDRESS)
-    if(NOT ${var})
-        if(DEFINED ENV{${var}})
-            set(${var} "$ENV{${var}}" CACHE STRING "${var}" FORCE)
-        else()
-            message(FATAL_ERROR "${var} is not set. Export it in your environment "
-                                "(e.g. via direnv) or pass -D${var}=... to CMake. "
-                                "See README.md for details.")
-        endif()
+    if(DEFINED ENV{${var}})
+        set(${var} $ENV{${var}} CACHE STRING "" FORCE)
+    else()
+        message(FATAL_ERROR "${var} is not set. Export it in your environment "
+                            "(e.g. via direnv) or pass -D${var}=... to CMake. "
+                            "See README.md for details.")
     endif()
 endforeach()
 
