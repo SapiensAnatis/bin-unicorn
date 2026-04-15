@@ -15,6 +15,8 @@ void display_error();
 /// @brief Show that an error has been recovered from by clearing a red LED.
 void clear_error();
 
+/// @brief Clear all bin leds - use this to reset prior to displaying a new combination.
+void clear_all_bin_leds();
 /// @brief Show that the next collection is food waste by lighting up a blue LED.
 void display_food_waste();
 /// @brief Show that the next collection is recycling by lighting up a red LED.

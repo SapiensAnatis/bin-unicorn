@@ -58,31 +58,19 @@ void display_error() { gpio_put(ERROR_LED_GPIO, true); }
 
 void clear_error() { gpio_put(ERROR_LED_GPIO, false); }
 
-static void disable_all_bin_leds() {
+void clear_all_bin_leds() {
     gpio_put(RECYCLING_BIN_LED_GPIO, false);
     gpio_put(GARDEN_BIN_LED_GPIO, false);
     gpio_put(GENERAL_BIN_LED_GPIO, false);
     gpio_put(FOOD_WASTE_BIN_LED_GPIO, false);
 }
 
-void display_food_waste() {
-    disable_all_bin_leds();
-    gpio_put(FOOD_WASTE_BIN_LED_GPIO, true);
-}
+void display_food_waste() { gpio_put(FOOD_WASTE_BIN_LED_GPIO, true); }
 
-void display_recycling() {
-    disable_all_bin_leds();
-    gpio_put(RECYCLING_BIN_LED_GPIO, true);
-}
+void display_recycling() { gpio_put(RECYCLING_BIN_LED_GPIO, true); }
 
-void display_garden_waste() {
-    disable_all_bin_leds();
-    gpio_put(GARDEN_BIN_LED_GPIO, true);
-}
+void display_garden_waste() { gpio_put(GARDEN_BIN_LED_GPIO, true); }
 
-void display_domestic_waste() {
-    disable_all_bin_leds();
-    gpio_put(GENERAL_BIN_LED_GPIO, true);
-}
+void display_domestic_waste() { gpio_put(GENERAL_BIN_LED_GPIO, true); }
 
 } // namespace bin_unicorn

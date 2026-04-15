@@ -81,6 +81,7 @@ int main() {
 
     while (true) {
         bin_unicorn::clear_error();
+        bin_unicorn::clear_all_bin_leds();
 
         auto [success, sleep, server_date, next_collections] = bin_unicorn::do_work_loop();
 
